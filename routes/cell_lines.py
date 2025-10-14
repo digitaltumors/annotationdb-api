@@ -14,7 +14,7 @@ from models.output import OutputFormat
 load_dotenv(override=True)
 
 
-router = APIRouter(prefix="/drug")
+router = APIRouter(prefix="/cell_lines")
 
 
 # Creating database connection/session
@@ -38,33 +38,33 @@ def get_db_session():
     summary="Extract drug data by utilizing drug names",
     # response_model=List[PubchemOutput],
 )
-async def get_drugs(
-    drugs: str = Query(
-        description="Drug names (comma seperated)",
-        example="Erlotinib,Gemcitabine,Afatinib",
+async def get_cell_lines(
+    cell_lines: str = Query(
+        description="Cell line names or cellosaurus accession id's (comma seperated)",
+        example="CJM,COLO_005,HeLa OR CVCL_0013,CVCL_053,CVCL_4965",
     ),
     format: OutputFormat = Query(
         OutputFormat.json, description="Output format: `json` or `csv`."
     ),
     session=Depends(get_db_session),
 ):
-    if not drugs:
+    if not cell_lines:
         raise HTTPException(
             status_code=400, detail="Need to include at least one drug to get output"
         )
 
-    drug_list = [drug for drug in drugs.split(",")]
+    cell_line_list = [drug for drug in cell_lines.split(",")]
 
     conditions = []
-    for name in drug_list:
+    for name in cell_line_list:
         if not isinstance(name, str):
             raise HTTPException(
                 status_code=400,
-                detail="Drug list must only include strings",
+                detail="Cell line list must only include strings",
             )
         cleaned = name.strip()
-        conditions.append(Pubchem.title == cleaned)
-        conditions.append(Pubchem.synonyms.like(f"%{cleaned}%"))
+        conditions.append(Cell_line.cell_line_name == cleaned)
+        conditions.append(Cell_line.synonyms.like(f"%{cleaned}%"))
 
     query = select(Pubchem).where(or_(*conditions))
     rows = session.scalars(query).all()
