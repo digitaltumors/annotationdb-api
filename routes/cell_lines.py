@@ -66,7 +66,7 @@ async def get_cell_lines(
         conditions.append(Cell_line.cell_line_name == cleaned)
         conditions.append(Cell_line.synonyms.like(f"%{cleaned}%"))
 
-    query = select(Pubchem).where(or_(*conditions))
+    query = select(Cell_line).where(or_(*conditions))
     rows = session.scalars(query).all()
 
     return rows
