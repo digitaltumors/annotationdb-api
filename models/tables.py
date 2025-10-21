@@ -8,12 +8,14 @@ class Base(DeclarativeBase):
 
 
 class Compounds(Base):
-    __tablename__ = "compounds"
+    __tablename__ = "pubchem_compounds"
 
     cid: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(Text())
     mapped_name: Mapped[str] = mapped_column(Text())
-    molecule_chembl_id: Mapped[str] = mapped_column(String(200), unique=True)
+    molecule_chembl_id: Mapped[str] = mapped_column(
+        String(200), unique=True, nullable=True
+    )
     molecular_formula: Mapped[str] = mapped_column(String(300))
     molecular_weight: Mapped[str] = mapped_column(String(50))
     smiles: Mapped[str] = mapped_column(String(2000))
@@ -101,7 +103,7 @@ class ChemblMechanism(Base):
 
     molecule_chembl_id: Mapped[str] = mapped_column(
         String(200),
-        ForeignKey("compounds.molecule_chembl_id", ondelete="CASCADE"),
+        ForeignKey("pubchem_compounds.molecule_chembl_id", ondelete="CASCADE"),
         primary_key=True,
     )
     parent_molecule_chembl_id: Mapped[str] = mapped_column(String(200))
@@ -110,7 +112,10 @@ class ChemblMechanism(Base):
     direct_interaction: Mapped[int] = mapped_column(Integer)
     disease_efficacy: Mapped[int] = mapped_column(Integer)
     max_phase: Mapped[int] = mapped_column(Integer)
-    mec_id: Mapped[int] = mapped_column(Integer)
+    mec_id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+    )
     mechanism_comment: Mapped[str] = mapped_column(Text())
     # mechanism_refs: Mapped[] = mapped_column() # best way to represent?
     molecular_mechanism: Mapped[int] = mapped_column(Integer)
@@ -193,7 +198,7 @@ class ChemblMechanism(Base):
 
 
 class CellLines(Base):
-    __tablename__ = "cell_lines"
+    __tablename__ = "cellosaurus_cell_lines"
 
     accession: Mapped[str] = mapped_column(String(32), primary_key=True)
     cell_line_name: Mapped[str] = mapped_column(String(200))
@@ -240,9 +245,11 @@ class CellLines(Base):
 class CompoundSynonyms(Base):
     __tablename__ = "drug_synonyms"
 
-    synonym: Mapped[str] = mapped_column(Text(), primary_key=True)
+    synonym: Mapped[str] = mapped_column(String(700), primary_key=True)
     pubchem_cid: Mapped[int] = mapped_column(
-        Integer, ForeignKey("compounds.cid", ondelete="CASCADE"), primary_key=True
+        Integer,
+        ForeignKey("pubchem_compounds.cid", ondelete="CASCADE"),
+        primary_key=True,
     )
     source: Mapped[str] = mapped_column(String(50))
     version: Mapped[datetime] = mapped_column(
