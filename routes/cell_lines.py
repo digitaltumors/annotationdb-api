@@ -7,9 +7,8 @@ from sqlalchemy import create_engine, select, or_
 from sqlalchemy.orm import sessionmaker
 import pandas as pd
 from dotenv import load_dotenv
-from models.pubchem import PubchemOutput
-from models.tables import Pubchem
-from models.output import OutputFormat
+from models.tables import CellLines
+# from models.output import OutputFormat
 
 load_dotenv(override=True)
 
@@ -35,17 +34,16 @@ def get_db_session():
 
 @router.get(
     "/many",
-    summary="Extract drug data by utilizing drug names",
-    # response_model=List[PubchemOutput],
+    summary="Extract cell line data by via cell line name",
 )
 async def get_cell_lines(
     cell_lines: str = Query(
         description="Cell line names or cellosaurus accession id's (comma seperated)",
-        example="CJM,COLO_005,HeLa OR CVCL_0013,CVCL_053,CVCL_4965",
+        example="HL-60,HeLa,CVCL_0060,CVCL_2030",
     ),
-    format: OutputFormat = Query(
-        OutputFormat.json, description="Output format: `json` or `csv`."
-    ),
+    # format: OutputFormat = Query(
+    #     OutputFormat.json, description="Output format: `json` or `csv`."
+    # ),
     session=Depends(get_db_session),
 ):
     if not cell_lines:
@@ -57,16 +55,10 @@ async def get_cell_lines(
 
     conditions = []
     for name in cell_line_list:
-        if not isinstance(name, str):
-            raise HTTPException(
-                status_code=400,
-                detail="Cell line list must only include strings",
-            )
-        cleaned = name.strip()
-        conditions.append(Cell_line.cell_line_name == cleaned)
-        conditions.append(Cell_line.synonyms.like(f"%{cleaned}%"))
+        conditions.append(CellLines.cell_line_name.ilike(name))
+        conditions.append(CellLines.accession.ilike(name))
+        conditions.append(CellLines.synonyms.ilike(name))
 
-    query = select(Pubchem).where(or_(*conditions))
-    rows = session.scalars(query).all()
+    rows = session.query(CellLines).filter(or_(*conditions)).distinct().all()
 
     return rows
