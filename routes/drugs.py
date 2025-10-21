@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 import pandas as pd
 from dotenv import load_dotenv
 from models.pubchem import PubchemOutput
-from models.tables import Pubchem
+from models.tables import Compounds, CompoundSynonyms
 from models.output import OutputFormat
 
 load_dotenv(override=True)
@@ -55,18 +55,21 @@ async def get_drugs(
 
     drug_list = [drug for drug in drugs.split(",")]
 
+    if not drug_list:
+        raise HTTPException(status_code=400, detail="No valid drug names found.")
+
     conditions = []
     for name in drug_list:
-        if not isinstance(name, str):
-            raise HTTPException(
-                status_code=400,
-                detail="Drug list must only include strings",
-            )
-        cleaned = name.strip()
-        conditions.append(Pubchem.title == cleaned)
-        conditions.append(Pubchem.synonyms.like(f"%{cleaned}%"))
+        conditions.append(Compounds.title.ilike(name))
+        conditions.append(CompoundSynonyms.synonym.ilike(name))
 
-    query = select(Pubchem).where(or_(*conditions))
+    query = (
+        session.query(Compounds)
+        .outerjoin(CompoundSynonyms, Compounds.cid == CompoundSynonyms.pubchem_cid)
+        .filter(or_(*conditions))
+        .distinct()
+    )
+
     rows = session.scalars(query).all()
 
     return rows
