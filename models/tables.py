@@ -289,7 +289,7 @@ class OncoTree(Base):
     history: Mapped[str] = mapped_column(Text(), nullable=True)
     revocations: Mapped[str] = mapped_column(Text(), nullable=True)
     precursors: Mapped[str] = mapped_column(Text(), nullable=True)
-    tissues: Mapped[str] = mapped_column(Text(), nullable=True)
+    tissue: Mapped[str] = mapped_column(Text(), nullable=True)
 
     version_api_identifier: Mapped[str] = mapped_column(String(100), index=True)
     version_release_date: Mapped[str] = mapped_column(String(10))
