@@ -116,6 +116,8 @@ class ChemblMechanism(Base):
     parent_molecule_chembl_id: Mapped[str] = mapped_column(String(200))
     action_type: Mapped[str] = mapped_column(String(30))
     binding_site_comment: Mapped[str] = mapped_column(String(30))
+    mechanism_of_action: Mapped[str] = mapped_column(Text())
+    mechanism_comment: Mapped[str] = mapped_column(Text())
     direct_interaction: Mapped[int] = mapped_column(Integer)
     disease_efficacy: Mapped[int] = mapped_column(Integer)
     max_phase: Mapped[int] = mapped_column(Integer)
@@ -123,7 +125,6 @@ class ChemblMechanism(Base):
         Integer,
         primary_key=True,
     )
-    mechanism_comment: Mapped[str] = mapped_column(Text())
     # mechanism_refs: Mapped[] = mapped_column() # best way to represent?
     molecular_mechanism: Mapped[int] = mapped_column(Integer)
     record_id: Mapped[int] = mapped_column(Integer)
