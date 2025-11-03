@@ -4,7 +4,7 @@ from typing import List
 from urllib.parse import quote_plus
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy import create_engine, select, or_
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, selectinload
 import pandas as pd
 from dotenv import load_dotenv
 from models.pubchem import PubchemOutput
@@ -65,11 +65,14 @@ async def get_drugs(
 
     query = (
         session.query(Compounds)
+        .options(
+            selectinload(Compounds.mechanisms),
+        )
         .outerjoin(CompoundSynonyms, Compounds.cid == CompoundSynonyms.pubchem_cid)
         .filter(or_(*conditions))
         .distinct()
     )
 
-    rows = session.scalars(query).all()
+    rows = query.all()
 
     return rows
