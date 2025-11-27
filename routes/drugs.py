@@ -61,6 +61,8 @@ async def get_drugs(
     conditions = []
     for name in drug_list:
         conditions.append(Compounds.title.ilike(name))
+        conditions.append(Compounds.cid.ilike(name))
+        conditions.append(Compounds.smiles.ilike(name))
         conditions.append(CompoundSynonyms.synonym.ilike(name))
 
     query = (
