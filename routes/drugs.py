@@ -40,8 +40,8 @@ def get_db_session():
 )
 async def get_drugs(
     drugs: str = Query(
-        description="Drug names (comma seperated)",
-        example="Erlotinib,Gemcitabine,Afatinib",
+        description="Compound name, SMILE, inchikey, or pubchem CID (comma separated)",
+        example="Erlotinib,C1=CC(=C(C(=C1)O)N)C(=O)CC(C(=O)O)N,CVSVTCORWBXHQV-UHFFFAOYSA-N,444",
     ),
     format: OutputFormat = Query(
         OutputFormat.json, description="Output format: `json` or `csv`."
@@ -63,6 +63,7 @@ async def get_drugs(
         conditions.append(Compounds.title.ilike(name))
         conditions.append(Compounds.cid.ilike(name))
         conditions.append(Compounds.smiles.ilike(name))
+        conditions.append(Compounds.inchikey.ilike(name))
         conditions.append(CompoundSynonyms.synonym.ilike(name))
 
     query = (
