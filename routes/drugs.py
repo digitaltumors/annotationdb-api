@@ -14,7 +14,7 @@ from models.output import OutputFormat
 load_dotenv(override=True)
 
 
-router = APIRouter(prefix="/drug")
+router = APIRouter(prefix="/compound")
 
 
 # Creating database connection/session
@@ -38,28 +38,28 @@ def get_db_session():
     summary="Extract drug data by utilizing drug names",
     # response_model=List[PubchemOutput],
 )
-async def get_drugs(
-    drugs: str = Query(
-        description="Compound name, SMILE, inchikey, or pubchem CID (comma separated)",
+async def get_compounds(
+    compounds: str = Query(
+        description="Unique compound identifiers such as: compound name, SMILE, inchikey, or pubchem CID (comma separated)",
         example="Erlotinib,C1=CC(=C(C(=C1)O)N)C(=O)CC(C(=O)O)N,CVSVTCORWBXHQV-UHFFFAOYSA-N,444",
     ),
-    format: OutputFormat = Query(
+    comm: OutputFormat = Query(
         OutputFormat.json, description="Output format: `json` or `csv`."
     ),
     session=Depends(get_db_session),
 ):
-    if not drugs:
+    if not compounds:
         raise HTTPException(
             status_code=400, detail="Need to include at least one drug to get output"
         )
 
-    drug_list = [drug for drug in drugs.split(",")]
+    compound_list = [compound for compound in compounds.split(",")]
 
-    if not drug_list:
+    if not compound_list:
         raise HTTPException(status_code=400, detail="No valid drug names found.")
 
     conditions = []
-    for name in drug_list:
+    for name in compound_list:
         conditions.append(Compounds.title.ilike(name))
         conditions.append(Compounds.cid.ilike(name))
         conditions.append(Compounds.smiles.ilike(name))
