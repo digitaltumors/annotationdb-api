@@ -56,7 +56,13 @@ async def get_compounds(
     compound_list = [compound for compound in compounds.split(",")]
 
     if not compound_list:
-        raise HTTPException(status_code=400, detail="No valid drug names found.")
+        raise HTTPException(status_code=400, detail="No valid compound names found.")
+
+    if len(compound_list) > 300:
+        raise HTTPException(
+            status_code=413,
+            detail="Compound list is too large, please batch identifiers into list of 300 or less",
+        )
 
     conditions = []
     for name in compound_list:
