@@ -1,4 +1,4 @@
-from sqlalchemy import String, Float, Integer, ForeignKey, Text, DateTime, func
+from sqlalchemy import String, Float, Integer, ForeignKey, Text, Boolean, DateTime, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from datetime import datetime
 
@@ -63,6 +63,7 @@ class Compounds(Base):
     literature_count: Mapped[int] = mapped_column(Integer)
     annotation_types: Mapped[str] = mapped_column(Text())
     annotation_type_count: Mapped[int] = mapped_column(Integer)
+    fda_approval: Mapped[bool] = mapped_column(Boolean)
     date_added: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -77,6 +78,92 @@ class Compounds(Base):
         primaryjoin="Compounds.molecule_chembl_id == foreign(ChemblMechanism.molecule_chembl_id)",
         back_populates="compound",
         lazy="selectin",
+    )
+
+    compound_bioassays: Mapped[list["CompoundBioAssays"]] = relationship(
+        "CompoundBioAssays",
+        back_populates="compound",
+        cascade="all, delete-orphan",
+    )
+
+    bioassays: Mapped[list["BioAssays"]] = relationship(
+        "BioAssays",
+        secondary="compound_bioassays",
+        back_populates="compounds",
+        lazy="selectin",
+    )
+
+
+class CompoundSynonyms(Base):
+    __tablename__ = "compound_synonyms"
+
+    synonym: Mapped[str] = mapped_column(String(700), primary_key=True)
+    pubchem_cid: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("pubchem_compounds.cid", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    source: Mapped[str] = mapped_column(String(50))
+    version: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+
+    ### ORM layer (fields below don't show up in table but are used in queries later on for convenience)
+    compound: Mapped["Compounds"] = relationship(back_populates="synonyms")
+
+
+class CompoundBioAssays(Base):
+    __tablename__ = "compound_bioassays"
+
+    bioassay_aid: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("bioassays.aid"),
+        primary_key=True,
+    )
+    pubchem_cid: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("pubchem_compounds.cid", ondelete="CASCADE"),
+        primary_key=True,
+    )
+
+    # ORM Layer
+    compound: Mapped["Compounds"] = relationship(
+        "Compounds",
+        back_populates="compound_bioassays",
+    )
+    bioassay: Mapped["BioAssays"] = relationship(
+        "BioAssays",
+        back_populates="compound_bioassays",
+    )
+
+
+class BioAssays(Base):
+    __tablename__ = "bioassays"
+
+    aid: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+    )
+    version: Mapped[int] = mapped_column(Integer)
+    assay_name: Mapped[str] = mapped_column(String(512))
+    source_name: Mapped[str] = mapped_column(String(255))
+    source_id: Mapped[str] = mapped_column(String(255))
+    description_combined: Mapped[str] = mapped_column(Text)
+    protocol_combined: Mapped[str] = mapped_column(Text)
+    comment_combined: Mapped[str] = mapped_column(Text)
+    activity_outcome_method: Mapped[int] = mapped_column(Integer)
+    target_name: Mapped[str] = mapped_column(Text)
+    target_protein_accession: Mapped[str] = mapped_column(Text)
+
+    compound_bioassays: Mapped[list["CompoundBioAssays"]] = relationship(
+        "CompoundBioAssays",
+        back_populates="bioassay",
+    )
+
+    compounds: Mapped[list["Compounds"]] = relationship(
+        "Compounds",
+        secondary="compound_bioassays",
+        back_populates="bioassays",
     )
 
 
@@ -220,9 +307,6 @@ class CellLines(Base):
     date: Mapped[str] = mapped_column(Text())
     age_at_sampling: Mapped[str] = mapped_column(String(50))
     sex_of_cell: Mapped[str] = mapped_column(String(30))
-    synonyms: Mapped[str] = mapped_column(Text())
-    diseases: Mapped[str] = mapped_column(Text())
-    cross_references: Mapped[str] = mapped_column(Text())
     hierarchy: Mapped[str] = mapped_column(Text())
 
     # Comment fields
@@ -255,23 +339,47 @@ class CellLines(Base):
     knockout_cell: Mapped[str] = mapped_column(Text())
     selected_for_resistance_to: Mapped[str] = mapped_column(Text())
 
+    synonyms: Mapped[list["CellLineSynonyms"]] = relationship(
+        back_populates="cell_line", cascade="all, delete-orphan"
+    )
 
-class CompoundSynonyms(Base):
-    __tablename__ = "drug_synonyms"
+    diseases: Mapped[list["CellLineDisease"]] = relationship(
+        back_populates="cell_line", cascade="all, delete-orphan"
+    )
 
-    synonym: Mapped[str] = mapped_column(String(700), primary_key=True)
-    pubchem_cid: Mapped[int] = mapped_column(
-        Integer,
-        ForeignKey("pubchem_compounds.cid", ondelete="CASCADE"),
+
+class CellLineSynonyms(Base):
+    __tablename__ = "cell_line_synonyms"
+
+    cellosaurus_accession: Mapped[str] = mapped_column(
+        String(32),
+        ForeignKey("cellosaurus_cell_lines.accession", ondelete="CASCADE"),
         primary_key=True,
     )
-    source: Mapped[str] = mapped_column(String(50))
+    synonym: Mapped[str] = mapped_column(String(100), primary_key=True)
+    source: Mapped[str] = mapped_column(String(50), primary_key=True)
     version: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
 
     ### ORM layer (fields below don't show up in table but are used in queries later on for convenience)
-    compound: Mapped["Compounds"] = relationship(back_populates="synonyms")
+    cell_line: Mapped["CellLines"] = relationship(back_populates="synonyms")
+
+
+class CellLineDisease(Base):
+    __tablename__ = "cell_line_disease"
+
+    cellosaurus_accession: Mapped[str] = mapped_column(
+        String(32),
+        ForeignKey("cellosaurus_cell_lines.accession", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    source: Mapped[str] = mapped_column(String(4), primary_key=True)
+    description: Mapped[str] = mapped_column(Text())
+
+    ### ORM layer (fields below don't show up in table but are used in queries later on for convenience)
+    cell_line: Mapped["CellLines"] = relationship(back_populates="diseases")
 
 
 class OncoTree(Base):
