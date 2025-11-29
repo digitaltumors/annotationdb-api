@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker, selectinload
 import pandas as pd
 from dotenv import load_dotenv
 from models.pubchem import PubchemOutput
-from models.tables import Compounds, CompoundSynonyms
+from models.tables import Compounds, CompoundSynonyms, CompoundBioAssays, BioAssays
 from models.output import OutputFormat
 
 load_dotenv(override=True)
@@ -41,7 +41,7 @@ def get_db_session():
 async def get_compounds(
     compounds: str = Query(
         description="Unique compound identifiers such as: compound name, SMILE, inchikey, or pubchem CID (comma separated)",
-        example="Erlotinib,C1=CC(=C(C(=C1)O)N)C(=O)CC(C(=O)O)N,CVSVTCORWBXHQV-UHFFFAOYSA-N,444",
+        example="Aspirin,C1=CC=C2C(=C1)C=CC(=O)O2,AQIXAKUUQRKLND-UHFFFAOYSA-N,59174488",
     ),
     comm: OutputFormat = Query(
         OutputFormat.json, description="Output format: `json` or `csv`."
@@ -58,10 +58,10 @@ async def get_compounds(
     if not compound_list:
         raise HTTPException(status_code=400, detail="No valid compound names found.")
 
-    if len(compound_list) > 300:
+    if len(compound_list) > 50:
         raise HTTPException(
             status_code=413,
-            detail="Compound list is too large, please batch identifiers into list of 300 or less",
+            detail="Compound list is too large, please batch identifiers into list of 50 or less",
         )
 
     conditions = []
@@ -76,8 +76,12 @@ async def get_compounds(
         session.query(Compounds)
         .options(
             selectinload(Compounds.mechanisms),
+            selectinload(Compounds.bioassays),
         )
-        .outerjoin(CompoundSynonyms, Compounds.cid == CompoundSynonyms.pubchem_cid)
+        .outerjoin(
+            CompoundSynonyms,
+            Compounds.cid == CompoundSynonyms.pubchem_cid,
+        )
         .filter(or_(*conditions))
         .distinct()
     )
