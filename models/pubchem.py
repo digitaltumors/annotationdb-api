@@ -100,3 +100,10 @@ class PubchemOutput(BaseModel):
     # ORM relationship fields
     mechanisms: list[Mechanism]
     bioassays: list[Bioassay]
+
+
+class PubchemList(BaseModel):
+    name: str
+    cid: int
+    smile: str
+    inchikey: str
