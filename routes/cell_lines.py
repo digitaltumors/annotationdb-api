@@ -35,7 +35,7 @@ def get_db_session():
 
 @router.get(
     "/many",
-    summary="Extract cell line data from list of cell line names and/or cellosaurus accession ids",
+    summary="Extract cell line data for list of unique identifiers",
     response_model=List[CellosaurusOutput],
 )
 async def get_cell_lines(
