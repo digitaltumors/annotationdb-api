@@ -35,7 +35,7 @@ def get_db_session():
 
 @router.get(
     "/many",
-    summary="Extract drug data by utilizing drug names",
+    summary="Extract compound data for list of unique identifiers",
     # response_model=List[PubchemOutput],
 )
 async def get_compounds(
@@ -43,7 +43,7 @@ async def get_compounds(
         description="Unique compound identifiers such as: compound name, SMILE, inchikey, or pubchem CID (comma separated)",
         example="Aspirin,C1=CC=C2C(=C1)C=CC(=O)O2,AQIXAKUUQRKLND-UHFFFAOYSA-N,59174488",
     ),
-    comm: OutputFormat = Query(
+    format: OutputFormat = Query(
         OutputFormat.json, description="Output format: `json` or `csv`."
     ),
     session=Depends(get_db_session),
