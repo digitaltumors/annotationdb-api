@@ -36,7 +36,7 @@ def get_db_session():
 @router.get(
     "/many",
     summary="Extract compound data for list of unique identifiers",
-    # response_model=List[PubchemOutput],
+    response_model=List[PubchemOutput],
 )
 async def get_compounds(
     compounds: str = Query(
