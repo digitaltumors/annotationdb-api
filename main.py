@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse
 from routes.drugs import router as drugs_router
 from routes.cell_lines import router as cell_lines_router
 
-app = FastAPI()
+app = FastAPI(swagger_ui_parameters={"syntaxHighlight": {"theme": "obsidian"}})
 app.include_router(drugs_router)
 app.include_router(cell_lines_router)
 
