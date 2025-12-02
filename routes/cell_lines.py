@@ -34,7 +34,7 @@ def get_db_session():
 
 @router.get(
     "/many",
-    summary="Extract cell line data by via cell line name",
+    summary="Extract cell line data from list of cell line names and/or cellosaurus accession ids",
 )
 async def get_cell_lines(
     cell_lines: str = Query(
@@ -76,7 +76,7 @@ async def get_cell_lines(
 
 @router.get(
     "/all",
-    summary="Get all cell lines that exist in AnnotationDB",
+    summary="Get all cell line names and cellosaurus accession ids for all cell lines that exist in AnnotationDB",
 )
 async def get_cell_line_names(
     session=Depends(get_db_session),
