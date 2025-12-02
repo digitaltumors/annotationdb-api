@@ -14,7 +14,7 @@ from models.cellosaurus import CellosaurusOutput, CellosuarusList
 load_dotenv(override=True)
 
 
-router = APIRouter(prefix="/cell_lines")
+router = APIRouter(prefix="/cell_line")
 
 
 # Creating database connection/session
