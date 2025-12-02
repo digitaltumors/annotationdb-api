@@ -38,7 +38,7 @@ def get_db_session():
 )
 async def get_cell_lines(
     cell_lines: str = Query(
-        description="Cell line names or cellosaurus accession id's (comma seperated)",
+        description="Unique cell line identifiers such as: cell line name or cellosaurus accession id (comma seperated)",
         example="HL-60,HeLa,CVCL_0060,CVCL_2030",
     ),
     format: OutputFormat = Query(
