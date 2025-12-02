@@ -72,3 +72,26 @@ async def get_cell_lines(
     )
 
     return rows
+
+
+@router.get(
+    "/all",
+    summary="Get all cell lines that exist in AnnotationDB",
+)
+async def get_cell_line_names(
+    session=Depends(get_db_session),
+):
+    rows = (
+        session.query(
+            CellLines.cell_line_name,
+            CellLines.accession,
+        )
+        .distinct()
+        .all()
+    )
+
+    result = []
+    for row in rows:
+        result.append({"name": row[0], "accession": row[1]})
+
+    return result
