@@ -51,3 +51,8 @@ class CellosaurusOutput(BaseModel):
 
     # ORM relationship fields
     diseases: Optional[list[Disease]] = None
+
+
+class CellosuarusList(BaseModel):
+    name: str
+    accession: str

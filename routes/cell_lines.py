@@ -9,7 +9,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from models.tables import CellLines, CellLineSynonyms, CellLineDisease
 from models.output import OutputFormat
-from models.cellosaurus import CellosaurusOutput
+from models.cellosaurus import CellosaurusOutput, CellosuarusList
 
 load_dotenv(override=True)
 
@@ -78,9 +78,10 @@ async def get_cell_lines(
 
 @router.get(
     "/all",
-    summary="Get all cell line names and cellosaurus accession ids for all cell lines that exist in AnnotationDB",
+    summary="Get names and cellosaurus accession ids for all cell lines in AnnotationDB",
+    response_model=list[CellosuarusList],
 )
-async def get_cell_line_names(
+async def get_cell_line_identifiers(
     session=Depends(get_db_session),
 ):
     rows = (
