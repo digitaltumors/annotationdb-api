@@ -7,8 +7,8 @@ from sqlalchemy import create_engine, select, or_
 from sqlalchemy.orm import sessionmaker, selectinload
 import pandas as pd
 from dotenv import load_dotenv
-from models.pubchem import PubchemOutput
-from models.tables import Compounds, CompoundSynonyms, CompoundBioAssays, BioAssays
+from models.pubchem import PubchemOutput, PubchemList
+from models.tables import Compounds, CompoundSynonyms
 from models.output import OutputFormat
 
 load_dotenv(override=True)
@@ -72,7 +72,7 @@ async def get_compounds(
         conditions.append(Compounds.inchikey.ilike(name))
         conditions.append(CompoundSynonyms.synonym.ilike(name))
 
-    query = (
+    rows = (
         session.query(Compounds)
         .options(
             selectinload(Compounds.mechanisms),
@@ -84,8 +84,32 @@ async def get_compounds(
         )
         .filter(or_(*conditions))
         .distinct()
+        .all()
     )
 
-    rows = query.all()
-
     return rows
+
+
+@router.get(
+    "/all",
+    summary="Get names, pubchem cids, smiles, and inchikeys for all compounds in AnnotationDB",
+    response_model=List[PubchemList],
+)
+async def get_compound_identifiers(
+    session=Depends(get_db_session),
+):
+    rows = (
+        session.query(
+            Compounds.title, Compounds.cid, Compounds.smiles, Compounds.inchikey
+        )
+        .distinct()
+        .all()
+    )
+
+    result = []
+    for row in rows:
+        result.append(
+            {"name": row[0], "cid": row[1], "smile": row[2], "inchikey": row[3]}
+        )
+
+    return result
