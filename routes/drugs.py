@@ -77,6 +77,7 @@ async def get_compounds(
         .options(
             selectinload(Compounds.mechanisms),
             selectinload(Compounds.bioassays),
+            selectinload(Compounds.toxicity),
         )
         .outerjoin(
             CompoundSynonyms,
