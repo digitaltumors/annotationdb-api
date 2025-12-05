@@ -113,5 +113,5 @@ class PubchemOutput(BaseModel):
 class PubchemList(BaseModel):
     name: str
     cid: int
-    smile: str
+    smiles: str
     inchikey: str
