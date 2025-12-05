@@ -110,7 +110,7 @@ async def get_compound_identifiers(
     result = []
     for row in rows:
         result.append(
-            {"name": row[0], "cid": row[1], "smile": row[2], "inchikey": row[3]}
+            {"name": row[0], "cid": row[1], "smiles": row[2], "inchikey": row[3]}
         )
 
     return result
