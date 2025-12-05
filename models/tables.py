@@ -93,6 +93,13 @@ class Compounds(Base):
         lazy="selectin",
     )
 
+    toxicity: Mapped["Toxicity"] = relationship(
+        "Toxicity",
+        back_populates="compound",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
 
 class CompoundSynonyms(Base):
     __tablename__ = "compound_synonyms"
@@ -164,6 +171,24 @@ class BioAssays(Base):
         "Compounds",
         secondary="compound_bioassays",
         back_populates="bioassays",
+    )
+
+
+class Toxicity(Base):
+    __tablename__ = "toxicity"
+
+    pubchem_cid: Mapped[int] = mapped_column(
+        Integer,
+        ForeignKey("pubchem_compounds.cid", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    dili_severity_grade: Mapped[int] = mapped_column(Integer)
+    dili_annotation: Mapped[str] = mapped_column(Text)
+    hepatotoxicity_likelihood_score: Mapped[str] = mapped_column(Text)
+
+    compound: Mapped["Compounds"] = relationship(
+        "Compounds",
+        back_populates="toxicity",
     )
 
 
