@@ -3,6 +3,13 @@ from typing import Optional
 from datetime import datetime
 
 
+class Toxicity(BaseModel):
+    pubchem_cid: int
+    dili_severity_grade: int
+    dili_annotation: str
+    hepatotoxicity_likelihood_score: str
+
+
 class Bioassay(BaseModel):
     aid: int
     version: int
@@ -100,6 +107,7 @@ class PubchemOutput(BaseModel):
     # ORM relationship fields
     mechanisms: list[Mechanism]
     bioassays: list[Bioassay]
+    toxicity: Toxicity
 
 
 class PubchemList(BaseModel):
