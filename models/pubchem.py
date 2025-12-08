@@ -105,9 +105,9 @@ class PubchemOutput(BaseModel):
     date_added: datetime
 
     # ORM relationship fields
-    mechanisms: list[Mechanism]
-    bioassays: list[Bioassay]
-    toxicity: Toxicity
+    mechanisms: Optional[list[Mechanism] | None] = None
+    bioassays: Optional[list[Bioassay] | None] = None
+    toxicity: Optional[Toxicity | None] = None
 
 
 class PubchemList(BaseModel):
