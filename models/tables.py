@@ -77,7 +77,7 @@ class Compounds(Base):
         "ChemblMechanism",
         primaryjoin="Compounds.molecule_chembl_id == foreign(ChemblMechanism.molecule_chembl_id)",
         back_populates="compound",
-        lazy="selectin",
+        lazy="noload",
     )
 
     compound_bioassays: Mapped[list["CompoundBioAssays"]] = relationship(
@@ -90,14 +90,13 @@ class Compounds(Base):
         "BioAssays",
         secondary="compound_bioassays",
         back_populates="compounds",
-        lazy="selectin",
+        lazy="noload",
     )
 
     toxicity: Mapped["Toxicity"] = relationship(
         "Toxicity",
         back_populates="compound",
-        uselist=False,
-        cascade="all, delete-orphan",
+        lazy="noload",
     )
 
 
