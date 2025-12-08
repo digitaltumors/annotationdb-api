@@ -44,7 +44,16 @@ async def get_compounds(
         example="Aspirin,C1=CC=C2C(=C1)C=CC(=O)O2,AQIXAKUUQRKLND-UHFFFAOYSA-N,59174488",
     ),
     format: OutputFormat = Query(
-        OutputFormat.json, description="Output format: `json` or `csv`."
+        OutputFormat, description="Output format: `json` or `csv`."
+    ),
+    bioassay: bool = Query(
+        description="Toggle field to include homo sapien relevant bioassays for queriued drugs",
+    ),
+    mechanism: bool = Query(
+        description="Toggle field to include ChEMBL mechanisms for queriued drugs",
+    ),
+    toxicity: bool = Query(
+        description="Toggle field to include toxicity for queriued drugs",
     ),
     session=Depends(get_db_session),
 ):
