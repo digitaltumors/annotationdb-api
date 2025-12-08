@@ -44,16 +44,19 @@ async def get_compounds(
         example="Aspirin,C1=CC=C2C(=C1)C=CC(=O)O2,AQIXAKUUQRKLND-UHFFFAOYSA-N,59174488",
     ),
     format: OutputFormat = Query(
-        OutputFormat, description="Output format: `json` or `csv`."
+        OutputFormat.json, description="Output format: `json` or `csv`."
     ),
     bioassay: bool = Query(
-        description="Toggle field to include homo sapien relevant bioassays for queriued drugs",
+        False,
+        description="Toggle to include homo sapien relevant bioassays for queried drugs",
     ),
     mechanism: bool = Query(
-        description="Toggle field to include ChEMBL mechanisms for queriued drugs",
+        False,
+        description="Toggle to include ChEMBL mechanisms for queried drugs",
     ),
     toxicity: bool = Query(
-        description="Toggle field to include toxicity for queriued drugs",
+        False,
+        description="Toggle to include toxicity for queried drugs",
     ),
     session=Depends(get_db_session),
 ):
@@ -81,13 +84,17 @@ async def get_compounds(
         conditions.append(Compounds.inchikey.ilike(name))
         conditions.append(CompoundSynonyms.synonym.ilike(name))
 
+    options = []
+    if mechanism:
+        options.append(selectinload(Compounds.mechanisms))
+    if bioassay:
+        options.append(selectinload(Compounds.bioassays))
+    if toxicity:
+        options.append(selectinload(Compounds.toxicity))
+
     rows = (
         session.query(Compounds)
-        .options(
-            selectinload(Compounds.mechanisms),
-            selectinload(Compounds.bioassays),
-            selectinload(Compounds.toxicity),
-        )
+        .options(*options)
         .outerjoin(
             CompoundSynonyms,
             Compounds.cid == CompoundSynonyms.pubchem_cid,
