@@ -52,7 +52,7 @@ async def get_compounds(
     ),
     mechanism: bool = Query(
         False,
-        description="Toggle to include ChEMBL mechanisms for queried drugs",
+        description="Toggle to include ChEMBL mechanism for queried drugs",
     ),
     toxicity: bool = Query(
         False,
