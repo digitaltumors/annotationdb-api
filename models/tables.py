@@ -1,4 +1,5 @@
 from sqlalchemy import String, Float, Integer, ForeignKey, Text, Boolean, DateTime, func
+from typing import Optional
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from datetime import datetime
 
@@ -13,7 +14,7 @@ class Compounds(Base):
     cid: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(Text())
     mapped_name: Mapped[str] = mapped_column(Text())
-    molecule_chembl_id: Mapped[str] = mapped_column(
+    molecule_chembl_id: Mapped[Optional[str]] = mapped_column(
         String(200), unique=True, nullable=True
     )
     molecular_formula: Mapped[str] = mapped_column(String(300))

@@ -55,7 +55,7 @@ class PubchemOutput(BaseModel):
     cid: int
     title: str
     mapped_name: str
-    molecule_chembl_id: str
+    molecule_chembl_id: Optional[str] = None
     molecular_formula: str
     molecular_weight: str
     smiles: str
