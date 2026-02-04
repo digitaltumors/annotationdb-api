@@ -82,6 +82,7 @@ async def get_compounds(
         conditions.append(Compounds.cid.ilike(name))
         conditions.append(Compounds.smiles.ilike(name))
         conditions.append(Compounds.inchikey.ilike(name))
+        conditions.append(Compounds.mapped_name.ilike(name))
         conditions.append(CompoundSynonyms.synonym.ilike(name))
 
     options = []
