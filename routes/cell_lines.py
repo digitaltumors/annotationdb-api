@@ -61,17 +61,29 @@ async def get_cell_lines(
         conditions.append(CellLines.accession.ilike(identifier))
         conditions.append(CellLineSynonyms.synonym.ilike(identifier))
 
-    rows = (
-        session.query(CellLines)
-        .options(selectinload(CellLines.diseases))
-        .outerjoin(
-            CellLineSynonyms,
-            CellLines.accession == CellLineSynonyms.cellosaurus_accession,
-        )
-        .filter(or_(*conditions))
-        .distinct()
-        .all()
-    )
+    retry = 0
+    while retry < 3:
+        try:
+            rows = (
+                session.query(CellLines)
+                .options(selectinload(CellLines.diseases))
+                .outerjoin(
+                    CellLineSynonyms,
+                    CellLines.accession == CellLineSynonyms.cellosaurus_accession,
+                )
+                .filter(or_(*conditions))
+                .distinct()
+                .all()
+            )
+            break
+        except Exception as error:
+            if retry >= 2:
+                raise HTTPException(
+                    status_code=500, detail=f"Data retrieval error: {error}"
+                )
+            else:
+                print(f"retry {retry}: {error}")
+                retry += 1
 
     return rows
 
