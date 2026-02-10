@@ -44,7 +44,9 @@ async def get_cell_lines(
         example="HL-60,HeLa,CVCL_0060,CVCL_2030",
     ),
     format: OutputFormat = Query(
-        OutputFormat.json, description="Output format: `json` or `csv`."
+        OutputFormat.json,
+        description="Output format: `json`",
+        # description="Output format: `json` or `csv`."
     ),
     session=Depends(get_db_session),
 ):
