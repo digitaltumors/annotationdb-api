@@ -2,8 +2,25 @@
 	color: #19615B !important;
 }
 
-.swagger-ui .info a{
+.swagger-ui .opblock.opblock-get .opblock-summary {
+	border: none !important;
+}
 
+.swagger-ui .opblock.opblock-get .opblock-summary-method{
+	background-color: #19615B !important;
+}
+
+.swagger-ui .opblock.opblock-get{
+	background-color: hsla(175, 68%, 38%, 0.1) !important;
+	border: none !important;
+}
+
+.swagger-ui .opblock.opblock-get .tab-header .tab-item.active h4 span::after {
+	background: #19615B !important;
+}
+
+.swagger-ui .model-box-control:focus, .swagger-ui .models-control:focus, .swagger-ui .opblock-summary-control:focus {
+	outline: none !important;
 }
 
 a code {
