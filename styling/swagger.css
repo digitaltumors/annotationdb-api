@@ -38,14 +38,14 @@ a code:hover {
 	transition: all .4s;
 }
 
-code {
+p code {
 	background: rgba(0, 0, 0, .05) !important;
 	border-radius: 6px !important;
 	color: #19615B !important;
 	font-family: monospace !important;
 	font-size: 13px !important;
 	font-weight: 600 !important;
-	padding: 0px 6px !important;
+	padding: 6px 6px !important;
 }
 
 a {
