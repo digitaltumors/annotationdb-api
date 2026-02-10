@@ -70,10 +70,10 @@ async def get_compounds(
     if not compound_list:
         raise HTTPException(status_code=400, detail="No valid compound names found.")
 
-    if len(compound_list) > 50:
+    if len(compound_list) > 20:
         raise HTTPException(
             status_code=413,
-            detail="Compound list is too large, please batch identifiers into list of 50 or less",
+            detail="Compound list is too large, please batch identifiers into a list of 20 or less",
         )
 
     conditions = []
@@ -93,17 +93,29 @@ async def get_compounds(
     if toxicity:
         options.append(selectinload(Compounds.toxicity))
 
-    rows = (
-        session.query(Compounds)
-        .options(*options)
-        .outerjoin(
-            CompoundSynonyms,
-            Compounds.cid == CompoundSynonyms.pubchem_cid,
-        )
-        .filter(or_(*conditions))
-        .distinct()
-        .all()
-    )
+    retry = 0
+    while retry < 3:
+        try:
+            rows = (
+                session.query(Compounds)
+                .options(*options)
+                .outerjoin(
+                    CompoundSynonyms,
+                    Compounds.cid == CompoundSynonyms.pubchem_cid,
+                )
+                .filter(or_(*conditions))
+                .distinct()
+                .all()
+            )
+            break
+        except Exception as error:
+            if retry >= 2:
+                raise HTTPException(
+                    status_code=500, detail=f"Data retrieval error: {error}"
+                )
+            else:
+                print(f"retry {retry}: {error}")
+                retry += 1
 
     return rows
 
