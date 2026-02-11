@@ -33,7 +33,7 @@ a code {
 	padding: 0px 6px !important;
 }
 
-span code {
+li code {
 	background: rgba(0, 0, 0, .05) !important;
 	border-radius: 6px !important;
 	color: #19615B !important;
