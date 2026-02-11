@@ -50,7 +50,7 @@ or cell lines stored in the database. These routes require one or more additiona
     	Compound specific route: <a href="{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false" target="_blank"><code>{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false</code></a>
         <ul>
         	<li><strong>Mandatory</strong>: Compound identifiers go after the <span><code>compounds=</code></span> comma separated without spaces</li>
-            <li><strong>Optional</strong>: Only json can be placed after <span><code>format=</code></span> but the option for tabular output will be <i>available soon</i> </li>
+            <li><strong>Optional</strong>: Only json can be placed after <span><code>format=</code></span>. The option for tabular output will be <i>available soon</i> </li>
             <ul><li><strong>Default value</strong>: json</li></ul>
             <li><strong>Optional</strong>: true/false goes after <span><code>bioassay=</code></span> to toggle populating the array of homo sapien bioassays related to the compound(s)</li>
 			<ul><li><strong>Default value</strong>: false</li></ul>
@@ -64,7 +64,7 @@ or cell lines stored in the database. These routes require one or more additiona
     	Cell line specific route: <a href="{os.getenv("URL_PREFIX")}/cell_line/many?cell_lines=HL-60,CVCL_2030&format=json" target="_blank"><code>{os.getenv("URL_PREFIX")}/cell_line/many?cell_lines=HL-60,CVCL_2030&format=json</code></a>
 		<ul>
         	<li><strong>Mandatory</strong>: Cell line identifiers go after the <span><code>cell_lines=</code></span> comma separated without spaces</li>
-            <li><strong>Optional</strong>: Only json can be placed after <span><code>format=</code></span> but the option for tabular output will be <i>available soon</i> </li>
+            <li><strong>Optional</strong>: Only json can be placed after <span><code>format=</code></span>. The option for tabular output will be <i>available soon</i> </li>
             <ul><li><strong>Default value</strong>: json</li></ul>
         </ul>
     </li>
@@ -92,7 +92,7 @@ app.mount("/styling", StaticFiles(directory="styling"), name="styling")
 async def custom_docs():
     return get_swagger_ui_html(
         openapi_url=app.openapi_url,
-        title="AnnotationDB Docs",
+        title="AnnotationDB API",
         swagger_favicon_url="/assets/favicon.ico",
         swagger_ui_parameters={"syntaxHighlight": {"theme": "obsidian"}},
         swagger_js_url="/styling/swagger.js",

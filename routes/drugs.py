@@ -45,18 +45,18 @@ async def get_compounds(
     ),
     format: OutputFormat = Query(
         OutputFormat.json,
-        description="Output format: `json`",
+        description="Output format: json",
         # description="Output format: `json` or `csv`."
     ),
     bioassay: bool = Query(
         False,
-        description="Toggle to include homo sapien relevant bioassays for queried drugs",
+        description="Toggle to include homo sapien relevant bioassays for queried drug(s)",
     ),
     mechanism: bool = Query(
-        False, description="Toggle to include ChEMBL mechanism for queried drugs"
+        False, description="Toggle to include ChEMBL mechanism for queried drug(s)"
     ),
     toxicity: bool = Query(
-        False, description="Toggle to include toxicity for queried drugs"
+        False, description="Toggle to include toxicity for queried drug(s)"
     ),
     session=Depends(get_db_session),
 ):
@@ -70,10 +70,10 @@ async def get_compounds(
     if not compound_list:
         raise HTTPException(status_code=400, detail="No valid compound names found.")
 
-    if len(compound_list) > 20:
+    if len(compound_list) > 50:
         raise HTTPException(
             status_code=413,
-            detail="Compound list is too large, please batch identifiers into a list of 20 or less",
+            detail="Compound list is too large, please batch identifiers into a list of 50 or less",
         )
 
     conditions = []
