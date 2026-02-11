@@ -33,6 +33,16 @@ a code {
 	padding: 0px 6px !important;
 }
 
+span code {
+	background: rgba(0, 0, 0, .05) !important;
+	border-radius: 6px !important;
+	color: #19615B !important;
+	font-family: monospace !important;
+	font-size: 13px !important;
+	font-weight: 600 !important;
+	padding: 0px 6px !important;
+}
+
 a code:hover {
 	color: #1fa297 !important;
 	transition: all .4s;
@@ -45,7 +55,7 @@ p code {
 	font-family: monospace !important;
 	font-size: 13px !important;
 	font-weight: 600 !important;
-	padding: 6px 6px !important;
+	padding: 1px 6px !important;
 }
 
 a {
@@ -58,7 +68,11 @@ ol {
 	gap: 3px;
 }
 
-
+ul {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
 
 /*Everything Below is default Swagger Docs css from https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css*/
 
