@@ -7,8 +7,8 @@ DESCRIPTION = f"""
 This API is developed and maintained by the <a href="https://bhklab.ca" target="_blank">Benjamin Haibe-Kains lab</a>
 
 The AnnotationDB API serves as a tool to retrieve annotations for various compounds and cell lines. The stored compounds
-and cell lines have either been used in datasets produced by the Haibe-Kains lab or have been requested to be added by close
-collaborators. Our annotations are timestamped and only updated after every 12 months. Once a full database update has concluded,
+and cell lines have either been used in datasets produced by the Haibe-Kains lab or have been requested by close
+collaborators. Our annotations are timestamped and only updated annually (every 12 months). Once a full database update has concluded,
 toggles to older versions will be available to ensure transparency and version control.
 
 Note, AnnotationDB is made up of two major internal components
