@@ -14,7 +14,7 @@ This API is developed and maintained by the <a href="https://bhklab.ca" target="
 
 The AnnotationDB API serves as a tool to retrieve annotations for various compounds and cell lines. The stored compounds
 and cell lines have either been used in datasets produced by the Haibe-Kains lab or have been requested by close
-collaborators. Our annotations are timestamped and are only updated after every 6-8 months. Once a full database update has concluded,
+collaborators. Our annotations are timestamped and only updated after every 6-8 months. Once a full database update has concluded,
 toggles to older versions will be available to ensure transparency and version control.
 
 Note, AnnotationDB is made up of two major internal components
@@ -31,7 +31,7 @@ All <strong>cell line annotation</strong> fields are stored directly from
 <a href="https://api.cellosaurus.org/api-methods" target="_blank"> cellosaurus</a>.
 
 There are two sets of compound and cell line GET routes that work almost identically. The first routes are the
-<strong><i>/all</i></strong> routes which simply list out all the compounds or cell lines stored in the database.
+<strong>/all</strong> routes which simply list out all the compounds or cell lines stored in the database.
 
 <ol>
 	<li>
@@ -42,18 +42,31 @@ There are two sets of compound and cell line GET routes that work almost identic
     </li>
 </ol>
 
-The second pair of routes are the <strong><i>/many</i></strong> routes which retrieve the full annotation data for either compounds
-or cell lines stored in the database. These routes require one or more additional parameters in the GET request. Specifically, you must
-pass identifier(s) for the compounds or cell lines you want to search the database for.
-
-Note: in the queries below, compound identifiers comes after the compounds= and the cell line identifiers come after cell_line=
+The second pair of routes are the <strong>/many</strong> routes which retrieve the full annotation data for either compounds
+or cell lines stored in the database. These routes require one or more additional parameters in the GET request.
 
 <ol>
 	<li>
     	Compound specific route: <a href="{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false" target="_blank"><code>{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false</code></a>
+        <ul>
+        	<li><strong>Mandatory</strong>: Compound identifiers go after the <span><code>compounds=</code></span> comma separated without spaces</li>
+            <li><strong>Optional</strong>: Only json can be placed after <span><code>format=</code></span> but the option for tabular output will be <i>available soon</i> </li>
+            <ul><li><strong>Default value</strong>: json</li></ul>
+            <li><strong>Optional</strong>: true/false goes after <span><code>bioassay=</code></span> to toggle populating the array of homo sapien bioassays related to the compound(s)</li>
+			<ul><li><strong>Default value</strong>: false</li></ul>
+            <li><strong>Optional</strong>: true/false goes after <span><code>mechanism=</code></span> to toggle populating the mechanism(s) of action related to the compound(s)</li>
+            <ul><li><strong>Default value</strong>: false</li></ul>
+            <li><strong>Option</strong>: true/false goes after <span><code>toxicity=</code></span> to toggle populating the toxicity fields related to the compound(s) (this defaults to false)</li>
+            <ul><li><strong>Default value</strong>: false</li></ul>
+        </ul>
     </li>
     <li>
     	Cell line specific route: <a href="{os.getenv("URL_PREFIX")}/cell_line/many?cell_lines=HL-60,CVCL_2030&format=json" target="_blank"><code>{os.getenv("URL_PREFIX")}/cell_line/many?cell_lines=HL-60,CVCL_2030&format=json</code></a>
+		<ul>
+        	<li><strong>Mandatory</strong>: Cell line identifiers go after the <span><code>cell_lines=</code></span> comma separated without spaces</li>
+            <li><strong>Optional</strong>: Only json can be placed after <span><code>format=</code></span> but the option for tabular output will be <i>available soon</i> </li>
+            <ul><li><strong>Default value</strong>: json</li></ul>
+        </ul>
     </li>
 </ol>
 
