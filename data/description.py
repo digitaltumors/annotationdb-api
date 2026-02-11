@@ -44,7 +44,7 @@ or cell lines stored in the database. These routes require one or more additiona
     	Compound specific route: <a href="{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false" target="_blank"><code>{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false</code></a>
         <ul>
         	<li><strong>Mandatory</strong>: Compound identifiers go after the <code>compounds=</code>. The compound list must be comma separated without spaces between items</li>
-            <li><strong>Optional</strong>: Only json can be placed after <code>format=</code>. The option for tabular output will be <i>available soon</i> </li>
+            <li><strong>Optional</strong>: Only json can be placed after <code>format=</code>. <i>The option for tabular output will be available soon</i> </li>
             <ul><li><strong>Default value</strong>: json</li></ul>
             <li><strong>Optional</strong>: true/false goes after <code>bioassay=</code> to toggle populating the array of homo sapien bioassays related to the compound(s)</li>
 			<ul><li><strong>Default value</strong>: false</li></ul>
@@ -58,7 +58,7 @@ or cell lines stored in the database. These routes require one or more additiona
     	Cell line specific route: <a href="{os.getenv("URL_PREFIX")}/cell_line/many?cell_lines=HL-60,CVCL_2030&format=json" target="_blank"><code>{os.getenv("URL_PREFIX")}/cell_line/many?cell_lines=HL-60,CVCL_2030&format=json</code></a>
 		<ul>
         	<li><strong>Mandatory</strong>: Cell line identifiers go after the <code>cell_lines=</code>. The cell line list must be comma separated without spaces between items</li>
-            <li><strong>Optional</strong>: Only json can be placed after <code>format=</code>. The option for tabular output will be <i>available soon</i> </li>
+            <li><strong>Optional</strong>: Only json can be placed after <code>format=</code>. <i>The option for tabular output will be available soon</i> </li>
             <ul><li><strong>Default value</strong>: json</li></ul>
         </ul>
     </li>
