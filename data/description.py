@@ -4,17 +4,17 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 DESCRIPTION = f"""
-This API is developed and maintained by the <a href="https://bhklab.ca" target="_blank">Benjamin Haibe-Kains lab</a> \n
+This API is developed and maintained by the <a href="https://bhklab.ca" target="_blank">Benjamin Haibe-Kains lab</a>
 
 The AnnotationDB API serves as a tool to retrieve annotations for various compounds and cell lines. The stored compounds
-and cell lines have either been used in datasets produced by the Haibe-Kains lab or have been requested by close
-collaborators. Our annotations are timestamped and only updated after every 6-8 months. Once a full database update has concluded,
+and cell lines have either been used in datasets produced by the Haibe-Kains lab or have been requested to be added by close
+collaborators. Our annotations are timestamped and only updated after every 12 months. Once a full database update has concluded,
 toggles to older versions will be available to ensure transparency and version control.
 
 Note, AnnotationDB is made up of two major internal components
 <ol>
 	<li>A SQL database of compound and cell line annotations</li>
-    <li>This Rest API that interfances with the SQL database for annotation data</li>
+    <li>This Rest API that interfaces with the SQL database for annotation data</li>
 </ol>
 
 <strong>Compound annotations</strong> along with accompanying bioassay and toxicity fields are stored directly from
@@ -43,22 +43,22 @@ or cell lines stored in the database. These routes require one or more additiona
 	<li>
     	Compound specific route: <a href="{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false" target="_blank"><code>{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false</code></a>
         <ul>
-        	<li><strong>Mandatory</strong>: Compound identifiers go after the <span><code>compounds=</code></span> comma separated without spaces</li>
-            <li><strong>Optional</strong>: Only json can be placed after <span><code>format=</code></span>. The option for tabular output will be <i>available soon</i> </li>
+        	<li><strong>Mandatory</strong>: Compound identifiers go after the <code>compounds=</code>. The compound list must be comma separated without spaces between items</li>
+            <li><strong>Optional</strong>: Only json can be placed after <code>format=</code>. The option for tabular output will be <i>available soon</i> </li>
             <ul><li><strong>Default value</strong>: json</li></ul>
-            <li><strong>Optional</strong>: true/false goes after <span><code>bioassay=</code></span> to toggle populating the array of homo sapien bioassays related to the compound(s)</li>
+            <li><strong>Optional</strong>: true/false goes after <code>bioassay=</code> to toggle populating the array of homo sapien bioassays related to the compound(s)</li>
 			<ul><li><strong>Default value</strong>: false</li></ul>
-            <li><strong>Optional</strong>: true/false goes after <span><code>mechanism=</code></span> to toggle populating the mechanism(s) of action related to the compound(s)</li>
+            <li><strong>Optional</strong>: true/false goes after <code>mechanism=</code> to toggle populating the mechanism(s) of action related to the compound(s)</li>
             <ul><li><strong>Default value</strong>: false</li></ul>
-            <li><strong>Option</strong>: true/false goes after <span><code>toxicity=</code></span> to toggle populating the toxicity fields related to the compound(s) (this defaults to false)</li>
+            <li><strong>Option</strong>: true/false goes after <code>toxicity=</code> to toggle populating the toxicity fields related to the compound(s)</li>
             <ul><li><strong>Default value</strong>: false</li></ul>
         </ul>
     </li>
     <li>
     	Cell line specific route: <a href="{os.getenv("URL_PREFIX")}/cell_line/many?cell_lines=HL-60,CVCL_2030&format=json" target="_blank"><code>{os.getenv("URL_PREFIX")}/cell_line/many?cell_lines=HL-60,CVCL_2030&format=json</code></a>
 		<ul>
-        	<li><strong>Mandatory</strong>: Cell line identifiers go after the <span><code>cell_lines=</code></span> comma separated without spaces</li>
-            <li><strong>Optional</strong>: Only json can be placed after <span><code>format=</code></span>. The option for tabular output will be <i>available soon</i> </li>
+        	<li><strong>Mandatory</strong>: Cell line identifiers go after the <code>cell_lines=</code>. The cell line list must be comma separated without spaces between items</li>
+            <li><strong>Optional</strong>: Only json can be placed after <code>format=</code>. The option for tabular output will be <i>available soon</i> </li>
             <ul><li><strong>Default value</strong>: json</li></ul>
         </ul>
     </li>
