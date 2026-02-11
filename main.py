@@ -1,11 +1,15 @@
+import os
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from fastapi.openapi.docs import get_swagger_ui_html
 from routes.drugs import router as drugs_router
 from routes.cell_lines import router as cell_lines_router
 from fastapi.staticfiles import StaticFiles
+from dotenv import load_dotenv
 
-DESCRIPTION = """
+load_dotenv(override=True)
+
+DESCRIPTION = f"""
 This API is developed and maintained by the <a href="https://bhklab.ca" target="_blank">Benjamin Haibe-Kains lab</a> \n
 
 The AnnotationDB API serves as a tool to retrieve annotations for various compounds and cell lines. The stored compounds
@@ -20,19 +24,21 @@ Note, AnnotationDB is made up of two major internal components
 </ol>
 
 <strong>Compound annotations</strong> along with accompanying bioassay and toxicity fields are stored directly from
-<a href="https://pubchem.ncbi.nlm.nih.gov/" target="_blank">Pubchem</a>. Compound mechnanism/MOA fields are stored directly from
-<a href="https://www.ebi.ac.uk/chembl/" target="_blank">ChEMBL</a>. All <strong>cell line annotation</strong>
-fields are stored directly from cellosaurus.
+<a href="https://pubchem.ncbi.nlm.nih.gov/docs/programmatic-access" target="_blank">Pubchem</a>.
+Compound mechnanism/MOA fields are stored directly from
+<a href="https://www.ebi.ac.uk/chembl/api/data/docs" target="_blank">ChEMBL</a>.
+All <strong>cell line annotation</strong> fields are stored directly from
+<a href="https://api.cellosaurus.org/api-methods" target="_blank"> cellosaurus</a>.
 
 There are two sets of compound and cell line GET routes that work almost identically. The first routes are the
 <strong><i>/all</i></strong> routes which simply list out all the compounds or cell lines stored in the database.
 
 <ol>
 	<li>
-		Compound specific route: <a href='https://annotationdb.bhklab.ca/compound/all' target="_blank"><code>https://annotationdb.bhklab.ca/compound/all</code></a>
+		Compound specific route: <a href="{os.getenv("URL_PREFIX")}/compound/all" target="_blank"><code>{os.getenv("URL_PREFIX")}/compound/all</code></a>
     </li>
     <li>
-    	Cell line specific route: <a href='https://annotationdb.bhklab.ca/cell_line/all' target="_blank" class="code-block"><code>https://annotationdb.bhklab.ca/cell_line/all</code></a>
+    	Cell line specific route: <a href="{os.getenv("URL_PREFIX")}/cell_line/all" target="_blank" class="code-block"><code>{os.getenv("URL_PREFIX")}/cell_line/all</code></a>
     </li>
 </ol>
 
@@ -44,10 +50,10 @@ Note: in the queries below, compound identifiers comes after the compounds= and 
 
 <ol>
 	<li>
-    	Compound specific route: <a href='https://annotationdb.bhklab.ca/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false' target="_blank"><code>https://annotationdb.bhklab.ca/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false</code></a>
+    	Compound specific route: <a href="{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false" target="_blank"><code>{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false</code></a>
     </li>
     <li>
-    	Cell line specific route: <a href='https://annotationdb.bhklab.ca/cell_line/many?cell_lines=HL-60,CVCL_2030&format=json' target="_blank"><code>https://annotationdb.bhklab.ca/cell_line/many?cell_lines=HL-60,CVCL_2030&format=json</code></a>
+    	Cell line specific route: <a href="{os.getenv("URL_PREFIX")}/cell_line/many?cell_lines=HL-60,CVCL_2030&format=json" target="_blank"><code>{os.getenv("URL_PREFIX")}/cell_line/many?cell_lines=HL-60,CVCL_2030&format=json</code></a>
     </li>
 </ol>
 
