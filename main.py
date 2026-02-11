@@ -17,6 +17,7 @@ app.include_router(drugs_router)
 app.include_router(cell_lines_router)
 
 app.mount("/styling", StaticFiles(directory="styling"), name="styling")
+app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 
 
 @app.get("/docs", include_in_schema=False)
