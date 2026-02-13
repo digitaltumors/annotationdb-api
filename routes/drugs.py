@@ -128,13 +128,25 @@ async def get_compounds(
 async def get_compound_identifiers(
     session=Depends(get_db_session),
 ):
-    rows = (
-        session.query(
-            Compounds.title, Compounds.cid, Compounds.smiles, Compounds.inchikey
-        )
-        .distinct()
-        .all()
-    )
+    retry = 0
+    while retry < 3:
+        try:
+            rows = (
+                session.query(
+                    Compounds.title, Compounds.cid, Compounds.smiles, Compounds.inchikey
+                )
+                .distinct()
+                .all()
+            )
+            break
+        except Exception as error:
+            if retry >= 2:
+                raise HTTPException(
+                    status_code=500, detail=f"Data retrieval error: {error}"
+                )
+            else:
+                print(f"retry {retry}: {error}")
+                retry += 1
 
     result = []
     for row in rows:

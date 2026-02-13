@@ -98,14 +98,26 @@ async def get_cell_lines(
 async def get_cell_line_identifiers(
     session=Depends(get_db_session),
 ):
-    rows = (
-        session.query(
-            CellLines.cell_line_name,
-            CellLines.accession,
-        )
-        .distinct()
-        .all()
-    )
+    retry = 0
+    while retry < 3:
+        try:
+            rows = (
+                session.query(
+                    CellLines.cell_line_name,
+                    CellLines.accession,
+                )
+                .distinct()
+                .all()
+            )
+            break
+        except Exception as error:
+            if retry >= 2:
+                raise HTTPException(
+                    status_code=500, detail=f"Data retrieval error: {error}"
+                )
+            else:
+                print(f"retry {retry}: {error}")
+                retry += 1
 
     result = []
     for row in rows:
