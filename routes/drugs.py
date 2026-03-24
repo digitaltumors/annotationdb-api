@@ -1,6 +1,6 @@
 import os
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Annotated
 from urllib.parse import quote_plus
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy import create_engine, select, or_, cast, func, select
@@ -40,10 +40,10 @@ def get_db_session():
     response_model=List[PubchemOutput],
 )
 async def get_compounds(
-    compounds: str = Query(
-        description="Unique compound identifiers such as: compound name, SMILE, inchikey, or pubchem CID (comma separated)",
-        example="Aspirin,C1=CC=C2C(=C1)C=CC(=O)O2,AQIXAKUUQRKLND-UHFFFAOYSA-N,59174488",
-    ),
+    compounds: Annotated[list[str], Query(
+        alias="compound",
+        description="Unique compound identifiers such as: compound name, SMILE, inchikey, or pubchem CID (&compound= separated))",
+    )],
     format: OutputFormat = Query(
         OutputFormat.json,
         description="Output format: json",
@@ -66,7 +66,8 @@ async def get_compounds(
             status_code=400, detail="Need to include at least one drug to get output"
         )
 
-    raw_terms = [term.strip() for term in compounds.split(",") if term.strip()]
+    raw_terms = [c.strip() for c in compounds if c.strip()]
+    print(raw_terms)
 
     if not raw_terms:
         raise HTTPException(status_code=400, detail="No valid compound names found.")
@@ -76,6 +77,7 @@ async def get_compounds(
             status_code=413,
             detail="Compound list is too large, please batch identifiers into a list of 50 or less",
         )
+
 
     cid_terms: list[int] = []
     inchikey_terms: list[str] = []
