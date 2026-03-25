@@ -8,9 +8,42 @@ from sqlalchemy.dialects.mysql import CHAR
 from sqlalchemy.orm import sessionmaker, selectinload
 import pandas as pd
 from dotenv import load_dotenv
-from models.pubchem import PubchemOutput, PubchemList
-from models.tables import Compounds, CompoundSynonyms
+from models.pubchem import PubchemOutput, PubchemList, CompoundManyNewResponse
+from models.tables import CompoundBioAssays, Compounds, CompoundSynonyms, BioAssays
 from models.output import OutputFormat
+GOLDEN_BIOASSAYS = [2060322,
+624171,
+624246,
+743035,
+743036,
+743040,
+743042,
+743069,
+624287,
+624288,
+743075,
+743079,
+743080,
+743094,
+1645877,
+652025,
+1963823,
+1963824,
+1645876,
+651631,
+504706,
+686970,
+902,
+903,
+904,
+914,
+915,
+924,
+1454,
+2528,
+995,
+485349,
+1347055]
 
 load_dotenv(override=True)
 
@@ -59,6 +92,10 @@ async def get_compounds(
     toxicity: bool = Query(
         False, description="Toggle to include toxicity for queried drug(s)"
     ),
+
+    golden_bioassay: bool = Query(
+        False, description="Toggle to include golden bioassays for queried drug(s)"
+    ),
     session=Depends(get_db_session),
 ):
     if not compounds:
@@ -67,7 +104,7 @@ async def get_compounds(
         )
 
     raw_terms = [c.strip() for c in compounds if c.strip()]
-    print(raw_terms)
+    
 
     if not raw_terms:
         raise HTTPException(status_code=400, detail="No valid compound names found.")
@@ -107,7 +144,12 @@ async def get_compounds(
     if mechanism:
         options.append(selectinload(Compounds.mechanisms))
     if bioassay:
-        options.append(selectinload(Compounds.bioassays))
+        if golden_bioassay:
+            options.append(
+                selectinload(Compounds.bioassays.and_(BioAssays.aid.in_(GOLDEN_BIOASSAYS)))
+            )
+        else:
+            options.append(selectinload(Compounds.bioassays))
     if toxicity:
         options.append(selectinload(Compounds.toxicity))
 
@@ -170,6 +212,251 @@ async def get_compounds(
 
     return rows
 
+@router.get('/many/new', summary="New endpoint to extract compound data for list of unique identifiers with improved query performance", response_model=CompoundManyNewResponse)
+async def get_compounds_new(
+    compounds: Annotated[list[str], Query(
+        alias="compound",
+        description="Unique compound identifiers such as: compound name, SMILE, inchikey, or pubchem CID (&compound= separated))",
+    )],
+    format: OutputFormat = Query(
+        OutputFormat.json,
+        description="Output format: json",
+        # description="Output format: `json` or `csv`."
+    ),
+    bioassay: bool = Query(
+        False,
+        description="Toggle to include homo sapien relevant bioassays for queried drug(s)",
+    ),
+    mechanism: bool = Query(
+        False, description="Toggle to include ChEMBL mechanism for queried drug(s)"
+    ),
+    toxicity: bool = Query(
+        False, description="Toggle to include toxicity for queried drug(s)"
+    ),
+
+    golden_bioassay: bool = Query(
+        False, description="Toggle to include golden bioassays for queried drug(s)"
+    ),
+    session=Depends(get_db_session)
+):
+    
+    if not compounds:
+        raise HTTPException(
+            status_code=400, detail="Need to include at least one drug to get output"
+        )
+
+    raw_terms = [c.strip() for c in compounds if c.strip()]
+    
+
+    if not raw_terms:
+        raise HTTPException(status_code=400, detail="No valid compound names found.")
+
+    if len(raw_terms) > 50:
+        raise HTTPException(
+            status_code=413,
+            detail="Compound list is too large, please batch identifiers into a list of 50 or less",
+        )
+
+
+    cid_terms: list[int] = []
+    inchikey_terms: list[str] = []
+    other_terms: list[str] = []
+
+    for term in raw_terms:
+        if term.isdigit():
+            cid_terms.append(int(term))
+            continue
+
+        # InChIKey: 27 chars, second-last char is '-'
+        if len(term) == 27 and term[-2] == "-":
+            inchikey_terms.append(term.lower())
+            continue
+
+        other_terms.append(term.lower())
+
+    cid_terms = list(dict.fromkeys(cid_terms))
+    inchikey_terms = list(dict.fromkeys(inchikey_terms))
+    other_terms = list(dict.fromkeys(other_terms))
+
+    # Your functional indexes on pubchem_compounds are CHAR(255) / CHAR(27)
+    other_terms_255 = [term[:255] for term in other_terms]
+    inchikey_terms_27 = [term[:27] for term in inchikey_terms]
+
+    options = []
+    if mechanism:
+        options.append(selectinload(Compounds.mechanisms))
+    if bioassay:
+        if golden_bioassay:
+            options.append(
+                selectinload(
+                    Compounds.compound_bioassays.and_(CompoundBioAssays.bioassay_aid.in_(GOLDEN_BIOASSAYS))).load_only(
+                        CompoundBioAssays.pubchem_cid, CompoundBioAssays.bioassay_aid
+                    )
+            )
+        else:
+            options.append(
+                selectinload(Compounds.compound_bioassays).load_only(CompoundBioAssays.pubchem_cid, CompoundBioAssays.bioassay_aid))
+    if toxicity:
+        options.append(selectinload(Compounds.toxicity))
+
+    # Match the indexed expressions on pubchem_compounds exactly
+    title_idx_expr = cast(func.lower(Compounds.title), CHAR(255, charset="utf8mb4"))
+    smiles_idx_expr = cast(func.lower(Compounds.smiles), CHAR(255, charset="utf8mb4"))
+    mapped_name_idx_expr = cast(
+        func.lower(Compounds.mapped_name), CHAR(255, charset="utf8mb4")
+    )
+    inchikey_idx_expr = cast(
+        func.lower(Compounds.inchikey), CHAR(27, charset="utf8mb4")
+    )
+
+    filters = []
+
+    if cid_terms:
+        filters.append(Compounds.cid.in_(cid_terms))
+
+    if inchikey_terms_27:
+        filters.append(inchikey_idx_expr.in_(inchikey_terms_27))
+
+    if other_terms_255:
+        filters.append(title_idx_expr.in_(other_terms_255))
+        filters.append(smiles_idx_expr.in_(other_terms_255))
+        filters.append(mapped_name_idx_expr.in_(other_terms_255))
+
+        # Uses compound_synonyms PRIMARY(synonym, pubchem_cid)
+        # Best if synonym column collation is case-insensitive.
+        synonym_exists = (
+            select(1)
+            .select_from(CompoundSynonyms)
+            .where(
+                CompoundSynonyms.pubchem_cid == Compounds.cid,
+                CompoundSynonyms.synonym.in_(other_terms),
+            )
+            .exists()
+        )
+        filters.append(synonym_exists)
+
+    if not filters:
+        raise HTTPException(status_code=400, detail="No valid compound identifiers found.")
+
+    retry = 0
+    while retry < 3:
+        try:
+            rows = (
+                session.query(Compounds)
+                .options(*options)
+                .filter(or_(*filters))
+                .all()
+            )
+            break
+        except Exception as error:
+            if retry >= 2:
+                raise HTTPException(
+                    status_code=500, detail=f"Data retrieval error: {error}"
+                )
+            print(f"retry {retry}: {error}")
+            retry += 1
+    
+    compound_aid_map: dict[int, list[int]] = {}
+    all_aids: set[int] = set()
+
+    if bioassay:
+        for compound in rows:
+            aids = [link.bioassay_aid for link in compound.compound_bioassays]
+            aids = list(dict.fromkeys(aids))
+            compound_aid_map[compound.cid] = aids
+            all_aids.update(aids)
+    
+    bioassay_lookup: dict[int, dict] = {}
+    
+    if bioassay and all_aids:
+        bioassay_rows = (
+            session.query(BioAssays)
+            .filter(BioAssays.aid.in_(all_aids))
+            .all()
+        )
+
+        for b in bioassay_rows:
+            bioassay_lookup[b.aid] = {
+                "aid": b.aid,
+                "version": b.version,
+                "assay_name": b.assay_name,
+                "source_name": b.source_name,
+                "source_id": b.source_id,
+                "description_combined": b.description_combined,
+                "protocol_combined": b.protocol_combined,
+                "comment_combined": b.comment_combined,
+                "activity_outcome_method": b.activity_outcome_method,
+                "target_name": b.target_name,
+                "target_protein_accession": b.target_protein_accession,
+            }
+    
+    compounds_payload = []
+    for c in rows:
+        compounds_payload.append(
+            {
+                "cid": c.cid,
+                "title": c.title,
+                "mapped_name": c.mapped_name,
+                "molecule_chembl_id": c.molecule_chembl_id,
+                "molecular_formula": c.molecular_formula,
+                "molecular_weight": c.molecular_weight,
+                "smiles": c.smiles,
+                "connectivity_smiles": c.connectivity_smiles,
+                "inchi": c.inchi,
+                "inchikey": c.inchikey,
+                "iupac_name": c.iupac_name,
+                "xlogp": c.xlogp,
+                "exact_mass": c.exact_mass,
+                "monoisotopic_mass": c.monoisotopic_mass,
+                "tpsa": c.tpsa,
+                "complexity": c.complexity,
+                "charge": c.charge,
+                "h_bond_donor_count": c.h_bond_donor_count,
+                "h_bond_acceptor_count": c.h_bond_acceptor_count,
+                "rotatable_bond_count": c.rotatable_bond_count,
+                "heavy_atom_count": c.heavy_atom_count,
+                "isotope_atom_count": c.isotope_atom_count,
+                "atom_stereo_count": c.atom_stereo_count,
+                "defined_atom_stereo_count": c.defined_atom_stereo_count,
+                "undefined_atom_stereo_count": c.undefined_atom_stereo_count,
+                "bond_stereo_count": c.bond_stereo_count,
+                "defined_bond_stereo_count": c.defined_bond_stereo_count,
+                "undefined_bond_stereo_count": c.undefined_bond_stereo_count,
+                "covalent_unit_count": c.covalent_unit_count,
+                "volume_3d": c.volume_3d,
+                "x_steric_quadrupole_3d": c.x_steric_quadrupole_3d,
+                "y_steric_quadrupole_3d": c.y_steric_quadrupole_3d,
+                "z_steric_quadrupole_3d": c.z_steric_quadrupole_3d,
+                "feature_count_3d": c.feature_count_3d,
+                "feature_acceptor_count_3d": c.feature_acceptor_count_3d,
+                "feature_donor_count_3d": c.feature_donor_count_3d,
+                "feature_anion_count_3d": c.feature_anion_count_3d,
+                "feature_cation_count_3d": c.feature_cation_count_3d,
+                "feature_ring_count_3d": c.feature_ring_count_3d,
+                "feature_hydrophobe_count_3d": c.feature_hydrophobe_count_3d,
+                "conformer_model_rmsd_3d": c.conformer_model_rmsd_3d,
+                "effective_rotor_count_3d": c.effective_rotor_count_3d,
+                "conformer_count_3d": c.conformer_count_3d,
+                "fingerprint_2d": c.fingerprint_2d,
+                "patent_count": c.patent_count,
+                "patent_family_count": c.patent_family_count,
+                "literature_count": c.literature_count,
+                "annotation_types": c.annotation_types,
+                "annotation_type_count": c.annotation_type_count,
+                "fda_approval": c.fda_approval,
+                "date_added": c.date_added,
+                "mechanisms": c.mechanisms if mechanism else None,
+                "toxicity": c.toxicity if toxicity else None,
+                "bioassays": compound_aid_map.get(c.cid, []),
+            }
+        )
+
+    return {
+        "compounds": compounds_payload,
+        "bioassays": bioassay_lookup,
+    }
+    
+ 
 
 @router.get(
     "/all",
