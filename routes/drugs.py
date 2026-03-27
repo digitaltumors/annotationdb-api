@@ -212,7 +212,7 @@ async def get_compounds(
 
     return rows
 
-@router.get('/many/new', summary="New endpoint to extract compound data for list of unique identifiers with improved query performance", response_model=CompoundManyNewResponse)
+@router.get('/many/streamline', summary="New endpoint to extract compound data for list of unique identifiers with improved query performance", response_model=CompoundManyNewResponse)
 async def get_compounds_new(
     compounds: Annotated[list[str], Query(
         alias="compound",
