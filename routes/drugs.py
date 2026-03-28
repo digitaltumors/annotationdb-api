@@ -47,9 +47,7 @@ GOLDEN_BIOASSAYS = [2060322,
 
 load_dotenv(override=True)
 
-
 router = APIRouter(prefix="/compound")
-
 
 # Creating database connection/session
 password_cleaned = quote_plus(os.getenv("DATABASE_PASS"))
@@ -84,23 +82,23 @@ async def get_compounds(
     ),
     bioassay: bool = Query(
         False,
-        description="Toggle to include homo sapien relevant bioassays for queried drug(s)",
+        description="Toggle to include homo sapien relevant bioassays for queried compound(s)",
     ),
     mechanism: bool = Query(
-        False, description="Toggle to include ChEMBL mechanism for queried drug(s)"
+        False, description="Toggle to include ChEMBL mechanism for queried compound(s)"
     ),
     toxicity: bool = Query(
-        False, description="Toggle to include toxicity for queried drug(s)"
+        False, description="Toggle to include toxicity for queried compound(s)"
     ),
 
     golden_bioassay: bool = Query(
-        False, description="Toggle to include golden bioassays for queried drug(s)"
+        False, description="Toggle to include gold standard bioassays for queried compound(s)"
     ),
     session=Depends(get_db_session),
 ):
     if not compounds:
         raise HTTPException(
-            status_code=400, detail="Need to include at least one drug to get output"
+            status_code=400, detail="Need to include at least one compound to get output"
         )
 
     raw_terms = [c.strip() for c in compounds if c.strip()]
@@ -236,24 +234,24 @@ async def get_compounds_new(
     ),
     bioassay: bool = Query(
         False,
-        description="Toggle to include homo sapien relevant bioassays for queried drug(s)",
+        description="Toggle to include homo sapien relevant bioassays for queried compound(s)",
     ),
     mechanism: bool = Query(
-        False, description="Toggle to include ChEMBL mechanism for queried drug(s)"
+        False, description="Toggle to include ChEMBL mechanism for queried compound(s)"
     ),
     toxicity: bool = Query(
-        False, description="Toggle to include toxicity for queried drug(s)"
+        False, description="Toggle to include toxicity for queried compound(s)"
     ),
 
     golden_bioassay: bool = Query(
-        False, description="Toggle to include golden bioassays for queried drug(s)"
+        False, description="Toggle to include gold standard bioassays for queried compound(s)"
     ),
     session=Depends(get_db_session)
 ):
     
     if not compounds:
         raise HTTPException(
-            status_code=400, detail="Need to include at least one drug to get output"
+            status_code=400, detail="Need to include at least one compound to get output"
         )
 
     raw_terms = [c.strip() for c in compounds if c.strip()]

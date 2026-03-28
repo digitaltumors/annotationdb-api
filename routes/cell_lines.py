@@ -52,7 +52,7 @@ async def get_cell_lines(
 ):
     if not cell_lines:
         raise HTTPException(
-            status_code=400, detail="Need to include at least one drug to get output"
+            status_code=400, detail="Need to include at least one cell line to get output"
         )
 
     cell_line_list = [cell_line for cell_line in cell_lines.split(",")]
