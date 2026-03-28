@@ -480,7 +480,7 @@ async def get_compound_identifiers(
         try:
             rows = (
                 session.query(
-                    Compounds.title, Compounds.cid, Compounds.smiles, Compounds.inchikey
+                    Compounds.title, Compounds.cid, Compounds.smiles, Compounds.inchikey, Compounds.mapped_name
                 )
                 .distinct()
                 .all()
@@ -498,7 +498,7 @@ async def get_compound_identifiers(
     result = []
     for row in rows:
         result.append(
-            {"name": row[0], "cid": row[1], "smiles": row[2], "inchikey": row[3]}
+            {"name": row[0], "cid": row[1], "smiles": row[2], "inchikey": row[3], "mapped_name": row[4]}
         )
 
     return result

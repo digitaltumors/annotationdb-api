@@ -178,3 +178,4 @@ class PubchemList(BaseModel):
     cid: int
     smiles: str
     inchikey: str
+    mapped_name: str
