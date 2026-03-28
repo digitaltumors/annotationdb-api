@@ -41,7 +41,7 @@ or cell lines stored in the database. These routes require one or more additiona
 
 <ol>
 	<li>
-    	Compound specific route: <a href="{os.getenv("URL_PREFIX")}/compound/many?compound=Aspirin&compound=59174488&format=json&bioassay=false&mechanism=false&toxicity=false" target="_blank"><code>{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin&compound=59174488&format=json&bioassay=false&mechanism=false&toxicity=false</code></a>
+    	Compound specific route: <a href="{os.getenv("URL_PREFIX")}/compound/many?compound=Aspirin&compound=59174488&format=json&bioassay=true&mechanism=true&toxicity=true&golden_bioassay=true" target="_blank"><code>{os.getenv("URL_PREFIX")}/compound/many?compound=Aspirin&compound=59174488&format=json&bioassay=true&mechanism=true&toxicity=true&golden_bioassay=true</code></a>
         <ul>
         	<li><strong>Mandatory</strong>: Compound identifiers are taken as a repeated/multi-value query parameter. To query multiple compounds, use the <code>compound=</code> parameter repeatedly.</li>
             <li><strong>Optional</strong>: Only json can be placed after <code>format=</code>. <i>The option for tabular output will be available soon</i> </li>
