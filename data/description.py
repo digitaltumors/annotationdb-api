@@ -41,12 +41,14 @@ or cell lines stored in the database. These routes require one or more additiona
 
 <ol>
 	<li>
-    	Compound specific route: <a href="{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false" target="_blank"><code>{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin,59174488&format=json&bioassay=false&mechanism=false&toxicity=false</code></a>
+    	Compound specific route: <a href="{os.getenv("URL_PREFIX")}/compound/many?compound=Aspirin&compound=59174488&format=json&bioassay=false&mechanism=false&toxicity=false" target="_blank"><code>{os.getenv("URL_PREFIX")}/compound/many?compounds=Aspirin&compound=59174488&format=json&bioassay=false&mechanism=false&toxicity=false</code></a>
         <ul>
-        	<li><strong>Mandatory</strong>: Compound identifiers go after the <code>compounds=</code>. The compound list must be comma separated without spaces between items</li>
+        	<li><strong>Mandatory</strong>: Compound identifiers are taken as a repeated/multi-value query parameter. To query multiple compounds, use the <code>compound=</code> parameter repeatedly.</li>
             <li><strong>Optional</strong>: Only json can be placed after <code>format=</code>. <i>The option for tabular output will be available soon</i> </li>
             <ul><li><strong>Default value</strong>: json</li></ul>
             <li><strong>Optional</strong>: true/false goes after <code>bioassay=</code> to toggle populating the array of homo sapien bioassays related to the compound(s)</li>
+			<ul><li><strong>Default value</strong>: false</li></ul>
+            <li><strong>Optional</strong>: true/false goes after <code>golden_bioassay=</code> to toggle populating the array of only golden specific homo sapien bioassays related to the compound(s). The <code>bioassay=</code> parameter must be set to true for golden bioassays to be retrieved. </li>
 			<ul><li><strong>Default value</strong>: false</li></ul>
             <li><strong>Optional</strong>: true/false goes after <code>mechanism=</code> to toggle populating the mechanism(s) of action related to the compound(s)</li>
             <ul><li><strong>Default value</strong>: false</li></ul>

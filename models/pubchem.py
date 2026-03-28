@@ -110,6 +110,69 @@ class PubchemOutput(BaseModel):
     toxicity: Optional[Toxicity | None] = None
 
 
+class PubChemOutputWithBioassayIds(BaseModel):
+    cid: int
+    title: str
+    mapped_name: str
+    molecule_chembl_id: Optional[str] = None
+    molecular_formula: str
+    molecular_weight: str
+    smiles: str
+    connectivity_smiles: str
+    inchi: str
+    inchikey: str
+    iupac_name: str
+    xlogp: float
+    exact_mass: str
+    monoisotopic_mass: str
+    tpsa: float
+    complexity: int
+    charge: int
+    h_bond_donor_count: int
+    h_bond_acceptor_count: int
+    rotatable_bond_count: int
+    heavy_atom_count: int
+    isotope_atom_count: int
+    atom_stereo_count: int
+    defined_atom_stereo_count: int
+    undefined_atom_stereo_count: int
+    bond_stereo_count: int
+    defined_bond_stereo_count: int
+    undefined_bond_stereo_count: int
+    covalent_unit_count: int
+    volume_3d: float
+    x_steric_quadrupole_3d: float
+    y_steric_quadrupole_3d: float
+    z_steric_quadrupole_3d: float
+    feature_count_3d: int
+    feature_acceptor_count_3d: int
+    feature_donor_count_3d: int
+    feature_anion_count_3d: int
+    feature_cation_count_3d: int
+    feature_ring_count_3d: int
+    feature_hydrophobe_count_3d: int
+    conformer_model_rmsd_3d: float
+    effective_rotor_count_3d: int
+    conformer_count_3d: int
+    fingerprint_2d: str
+    patent_count: int
+    patent_family_count: int
+    literature_count: int
+    annotation_types: str
+    annotation_type_count: int
+    fda_approval: bool
+    date_added: datetime
+
+    # ORM relationship fields
+    mechanisms: Optional[list[Mechanism] | None] = None
+    toxicity: Optional[Toxicity | None] = None
+    bioassays: Optional[list[int]] = []
+
+
+class CompoundManyNewResponse(BaseModel):
+    compounds: list[PubChemOutputWithBioassayIds]
+    bioassays: dict[int, Bioassay]
+
 class PubchemList(BaseModel):
     name: str
     cid: int
