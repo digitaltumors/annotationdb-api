@@ -11,39 +11,42 @@ from dotenv import load_dotenv
 from models.pubchem import PubchemOutput, PubchemList, CompoundManyNewResponse
 from models.tables import CompoundBioAssays, Compounds, CompoundSynonyms, BioAssays
 from models.output import OutputFormat
-GOLDEN_BIOASSAYS = [2060322,
-624171,
-624246,
-743035,
-743036,
-743040,
-743042,
-743069,
-624287,
-624288,
-743075,
-743079,
-743080,
-743094,
-1645877,
-652025,
-1963823,
-1963824,
-1645876,
-651631,
-504706,
-686970,
-902,
-903,
-904,
-914,
-915,
-924,
-1454,
-2528,
-995,
-485349,
-1347055]
+
+GOLDEN_BIOASSAYS = [
+    2060322,
+    624171,
+    624246,
+    743035,
+    743036,
+    743040,
+    743042,
+    743069,
+    624287,
+    624288,
+    743075,
+    743079,
+    743080,
+    743094,
+    1645877,
+    652025,
+    1963823,
+    1963824,
+    1645876,
+    651631,
+    504706,
+    686970,
+    902,
+    903,
+    904,
+    914,
+    915,
+    924,
+    1454,
+    2528,
+    995,
+    485349,
+    1347055,
+]
 
 load_dotenv(override=True)
 
@@ -71,10 +74,13 @@ def get_db_session():
     response_model=List[PubchemOutput],
 )
 async def get_compounds(
-    compounds: Annotated[list[str], Query(
-        alias="compound",
-        description="Unique compound identifiers such as: compound name, SMILE, inchikey, or pubchem CID (&compound= separated))",
-    )],
+    compounds: Annotated[
+        list[str],
+        Query(
+            alias="compound",
+            description="Unique compound identifiers such as: compound name, SMILE, inchikey, or pubchem CID (&compound= separated))",
+        ),
+    ],
     format: OutputFormat = Query(
         OutputFormat.json,
         description="Output format: json",
@@ -90,29 +96,28 @@ async def get_compounds(
     toxicity: bool = Query(
         False, description="Toggle to include toxicity for queried compound(s)"
     ),
-
     golden_bioassay: bool = Query(
-        False, description="Toggle to include gold standard bioassays for queried compound(s)"
+        False,
+        description="Toggle to include gold standard bioassays for queried compound(s)",
     ),
     session=Depends(get_db_session),
 ):
     if not compounds:
         raise HTTPException(
-            status_code=400, detail="Need to include at least one compound to get output"
+            status_code=400,
+            detail="Need to include at least one compound to get output",
         )
 
     raw_terms = [c.strip() for c in compounds if c.strip()]
-    
 
     if not raw_terms:
         raise HTTPException(status_code=400, detail="No valid compound names found.")
 
-    if len(raw_terms) > 50:
+    if len(raw_terms) > 250:
         raise HTTPException(
             status_code=413,
-            detail="Compound list is too large, please batch identifiers into a list of 50 or less",
+            detail="Compound list is too large, please batch identifiers into a list of 250 or less",
         )
-
 
     cid_terms: list[int] = []
     inchikey_terms: list[str] = []
@@ -144,7 +149,9 @@ async def get_compounds(
     if bioassay:
         if golden_bioassay:
             options.append(
-                selectinload(Compounds.bioassays.and_(BioAssays.aid.in_(GOLDEN_BIOASSAYS)))
+                selectinload(
+                    Compounds.bioassays.and_(BioAssays.aid.in_(GOLDEN_BIOASSAYS))
+                )
             )
         else:
             options.append(selectinload(Compounds.bioassays))
@@ -221,12 +228,20 @@ async def get_compounds(
 
     return rows
 
-@router.get('/many/streamline', summary="New endpoint to extract compound data for list of unique identifiers with improved query performance", response_model=CompoundManyNewResponse)
+
+@router.get(
+    "/many/streamline",
+    summary="New endpoint to extract compound data for list of unique identifiers with improved query performance",
+    response_model=CompoundManyNewResponse,
+)
 async def get_compounds_new(
-    compounds: Annotated[list[str], Query(
-        alias="compound",
-        description="Unique compound identifiers such as: compound name, SMILE, inchikey, or pubchem CID (&compound= separated))",
-    )],
+    compounds: Annotated[
+        list[str],
+        Query(
+            alias="compound",
+            description="Unique compound identifiers such as: compound name, SMILE, inchikey, or pubchem CID (&compound= separated))",
+        ),
+    ],
     format: OutputFormat = Query(
         OutputFormat.json,
         description="Output format: json",
@@ -242,20 +257,20 @@ async def get_compounds_new(
     toxicity: bool = Query(
         False, description="Toggle to include toxicity for queried compound(s)"
     ),
-
     golden_bioassay: bool = Query(
-        False, description="Toggle to include gold standard bioassays for queried compound(s)"
+        False,
+        description="Toggle to include gold standard bioassays for queried compound(s)",
     ),
-    session=Depends(get_db_session)
+    session=Depends(get_db_session),
 ):
-    
+
     if not compounds:
         raise HTTPException(
-            status_code=400, detail="Need to include at least one compound to get output"
+            status_code=400,
+            detail="Need to include at least one compound to get output",
         )
 
     raw_terms = [c.strip() for c in compounds if c.strip()]
-    
 
     if not raw_terms:
         raise HTTPException(status_code=400, detail="No valid compound names found.")
@@ -265,7 +280,6 @@ async def get_compounds_new(
             status_code=413,
             detail="Compound list is too large, please batch identifiers into a list of 50 or less",
         )
-
 
     cid_terms: list[int] = []
     inchikey_terms: list[str] = []
@@ -298,13 +312,19 @@ async def get_compounds_new(
         if golden_bioassay:
             options.append(
                 selectinload(
-                    Compounds.compound_bioassays.and_(CompoundBioAssays.bioassay_aid.in_(GOLDEN_BIOASSAYS))).load_only(
-                        CompoundBioAssays.pubchem_cid, CompoundBioAssays.bioassay_aid
+                    Compounds.compound_bioassays.and_(
+                        CompoundBioAssays.bioassay_aid.in_(GOLDEN_BIOASSAYS)
                     )
+                ).load_only(
+                    CompoundBioAssays.pubchem_cid, CompoundBioAssays.bioassay_aid
+                )
             )
         else:
             options.append(
-                selectinload(Compounds.compound_bioassays).load_only(CompoundBioAssays.pubchem_cid, CompoundBioAssays.bioassay_aid))
+                selectinload(Compounds.compound_bioassays).load_only(
+                    CompoundBioAssays.pubchem_cid, CompoundBioAssays.bioassay_aid
+                )
+            )
     if toxicity:
         options.append(selectinload(Compounds.toxicity))
 
@@ -345,16 +365,15 @@ async def get_compounds_new(
         filters.append(synonym_exists)
 
     if not filters:
-        raise HTTPException(status_code=400, detail="No valid compound identifiers found.")
+        raise HTTPException(
+            status_code=400, detail="No valid compound identifiers found."
+        )
 
     retry = 0
     while retry < 3:
         try:
             rows = (
-                session.query(Compounds)
-                .options(*options)
-                .filter(or_(*filters))
-                .all()
+                session.query(Compounds).options(*options).filter(or_(*filters)).all()
             )
             break
         except Exception as error:
@@ -364,7 +383,7 @@ async def get_compounds_new(
                 )
             print(f"retry {retry}: {error}")
             retry += 1
-    
+
     compound_aid_map: dict[int, list[int]] = {}
     all_aids: set[int] = set()
 
@@ -374,14 +393,12 @@ async def get_compounds_new(
             aids = list(dict.fromkeys(aids))
             compound_aid_map[compound.cid] = aids
             all_aids.update(aids)
-    
+
     bioassay_lookup: dict[int, dict] = {}
-    
+
     if bioassay and all_aids:
         bioassay_rows = (
-            session.query(BioAssays)
-            .filter(BioAssays.aid.in_(all_aids))
-            .all()
+            session.query(BioAssays).filter(BioAssays.aid.in_(all_aids)).all()
         )
 
         for b in bioassay_rows:
@@ -398,7 +415,7 @@ async def get_compounds_new(
                 "target_name": b.target_name,
                 "target_protein_accession": b.target_protein_accession,
             }
-    
+
     compounds_payload = []
     for c in rows:
         compounds_payload.append(
@@ -464,8 +481,7 @@ async def get_compounds_new(
         "compounds": compounds_payload,
         "bioassays": bioassay_lookup,
     }
-    
- 
+
 
 @router.get(
     "/all",
@@ -480,7 +496,11 @@ async def get_compound_identifiers(
         try:
             rows = (
                 session.query(
-                    Compounds.title, Compounds.cid, Compounds.smiles, Compounds.inchikey, Compounds.mapped_name
+                    Compounds.title,
+                    Compounds.cid,
+                    Compounds.smiles,
+                    Compounds.inchikey,
+                    Compounds.mapped_name,
                 )
                 .distinct()
                 .all()
@@ -498,7 +518,13 @@ async def get_compound_identifiers(
     result = []
     for row in rows:
         result.append(
-            {"name": row[0], "cid": row[1], "smiles": row[2], "inchikey": row[3], "mapped_name": row[4]}
+            {
+                "name": row[0],
+                "cid": row[1],
+                "smiles": row[2],
+                "inchikey": row[3],
+                "mapped_name": row[4],
+            }
         )
 
     return result
