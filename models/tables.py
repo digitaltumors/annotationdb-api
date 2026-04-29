@@ -1,5 +1,4 @@
 from sqlalchemy import String, Float, Integer, ForeignKey, Text, Boolean, DateTime, func
-from typing import Optional
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from datetime import datetime
 
@@ -14,7 +13,7 @@ class Compounds(Base):
     cid: Mapped[int] = mapped_column(primary_key=True)
     title: Mapped[str] = mapped_column(Text())
     mapped_name: Mapped[str] = mapped_column(Text())
-    molecule_chembl_id: Mapped[Optional[str]] = mapped_column(
+    molecule_chembl_id: Mapped[str] = mapped_column(
         String(200), unique=True, nullable=True
     )
     molecular_formula: Mapped[str] = mapped_column(String(300))
@@ -64,6 +63,8 @@ class Compounds(Base):
     literature_count: Mapped[int] = mapped_column(Integer)
     annotation_types: Mapped[str] = mapped_column(Text())
     annotation_type_count: Mapped[int] = mapped_column(Integer)
+    chembl_max_phase: Mapped[int] = mapped_column(Integer)
+    drug_like: Mapped[bool] = mapped_column(Boolean)
     fda_approval: Mapped[bool] = mapped_column(Boolean)
     date_added: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -237,13 +238,14 @@ class ChemblMechanism(Base):
         Integer,
         primary_key=True,
     )
-    # mechanism_refs: Mapped[] = mapped_column() # best way to represent?
+    mechanism_refs: Mapped[str] = mapped_column(Text())
     molecular_mechanism: Mapped[int] = mapped_column(Integer)
     record_id: Mapped[int] = mapped_column(Integer)
     selectivity_comment: Mapped[str] = mapped_column(Text())
     site_id: Mapped[str] = mapped_column(Text())
     target_chembl_id: Mapped[str] = mapped_column(String(30))
-    # Fields below are extracted from the variant sequence object (if it exists [like does not])
+    target_name: Mapped[str] = mapped_column(Text())
+    # Fields below are extracted from the variant sequence object
     variant_sequence_accession: Mapped[str] = mapped_column(String(50))
     variant_sequence_isoform: Mapped[int] = mapped_column(Integer)
     variant_sequence_mutation: Mapped[str] = mapped_column(String(50))
@@ -251,6 +253,8 @@ class ChemblMechanism(Base):
     variant_sequence_sequence: Mapped[str] = mapped_column(Text())
     variant_sequence_tax_id: Mapped[int] = mapped_column(Integer)
     variant_sequence_version: Mapped[int] = mapped_column(Integer)
+    # activity_id: Mapped[str] = mapped_column(String(15))
+    source: Mapped[str] = mapped_column(String(15))
 
     compound: Mapped["Compounds"] = relationship(
         "Compounds",

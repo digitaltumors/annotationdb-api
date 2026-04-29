@@ -35,11 +35,13 @@ class Mechanism(BaseModel):
     disease_efficacy: int
     max_phase: int
     mec_id: int
+    mechanism_refs: str
     molecular_mechanism: int
     record_id: int
     selectivity_comment: str
     site_id: str
     target_chembl_id: str
+    target_name: str
 
     # Fields below are extracted from the variant sequence object (if it exists [likely does not])
     variant_sequence_accession: str
@@ -49,6 +51,7 @@ class Mechanism(BaseModel):
     variant_sequence_sequence: str
     variant_sequence_tax_id: int
     variant_sequence_version: int
+    source: str
 
 
 class PubchemOutput(BaseModel):
@@ -101,6 +104,8 @@ class PubchemOutput(BaseModel):
     literature_count: int
     annotation_types: str
     annotation_type_count: int
+    chembl_max_phase: int
+    drug_like: bool
     fda_approval: bool
     date_added: datetime
 
@@ -160,6 +165,8 @@ class PubChemOutputWithBioassayIds(BaseModel):
     literature_count: int
     annotation_types: str
     annotation_type_count: int
+    chembl_max_phase: int
+    drug_like: bool
     fda_approval: bool
     date_added: datetime
 
