@@ -52,6 +52,7 @@ class Mechanism(BaseModel):
     variant_sequence_tax_id: int
     variant_sequence_version: int
     source: str
+    inferred_from_parent: bool
 
 
 class PubchemOutput(BaseModel):
