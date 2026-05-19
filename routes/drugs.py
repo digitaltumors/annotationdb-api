@@ -177,7 +177,7 @@ async def get_compounds(
         func.lower(Compounds.inchikey), CHAR(27, charset="utf8mb4")
     )
 
-    # resolve all term types to CIDs using separate index queries.
+    # resolve all term types to CIDs
     resolved_cids: set[int] = set(cid_terms)
 
     try:
@@ -234,6 +234,32 @@ async def get_compounds(
                 )
             print(f"retry {retry}: {error}")
             retry += 1
+
+    # Match each compound back to the original query term using already-loaded fields
+    term_lower_to_orig = {t.lower(): t for t in raw_terms}
+    for c in rows:
+        c.query_field = (
+            term_lower_to_orig.get(str(c.cid))
+            or term_lower_to_orig.get((c.inchikey or "").lower()[:27])
+            or term_lower_to_orig.get((c.title or "").lower()[:255])
+            or term_lower_to_orig.get((c.smiles or "").lower()[:255])
+            or term_lower_to_orig.get((c.mapped_name or "").lower()[:255])
+        )
+
+    # Synonym fallback — only query for compounds that didn't match above
+    unresolved = [c for c in rows if c.query_field is None]
+    if other_terms and unresolved:
+        syn_rows = (
+            session.query(CompoundSynonyms.pubchem_cid, CompoundSynonyms.synonym)
+            .filter(
+                CompoundSynonyms.pubchem_cid.in_([c.cid for c in unresolved]),
+                CompoundSynonyms.synonym.in_(other_terms),
+            )
+            .all()
+        )
+        cid_to_syn = {cid: term_lower_to_orig.get(syn.lower()) for cid, syn in syn_rows}
+        for c in unresolved:
+            c.query_field = cid_to_syn.get(c.cid)
 
     return rows
 
@@ -393,6 +419,32 @@ async def get_compounds_new(
             print(f"retry {retry}: {error}")
             retry += 1
 
+    # Match each compound back to the original query term using already-loaded fields
+    term_lower_to_orig = {t.lower(): t for t in raw_terms}
+    for c in rows:
+        c.query_field = (
+            term_lower_to_orig.get(str(c.cid))
+            or term_lower_to_orig.get((c.inchikey or "").lower()[:27])
+            or term_lower_to_orig.get((c.title or "").lower()[:255])
+            or term_lower_to_orig.get((c.smiles or "").lower()[:255])
+            or term_lower_to_orig.get((c.mapped_name or "").lower()[:255])
+        )
+
+    # Synonym fallback — only query for compounds that didn't match above
+    unresolved = [c for c in rows if c.query_field is None]
+    if other_terms and unresolved:
+        syn_rows = (
+            session.query(CompoundSynonyms.pubchem_cid, CompoundSynonyms.synonym)
+            .filter(
+                CompoundSynonyms.pubchem_cid.in_([c.cid for c in unresolved]),
+                CompoundSynonyms.synonym.in_(other_terms),
+            )
+            .all()
+        )
+        cid_to_syn = {cid: term_lower_to_orig.get(syn.lower()) for cid, syn in syn_rows}
+        for c in unresolved:
+            c.query_field = cid_to_syn.get(c.cid)
+
     compound_aid_map: dict[int, list[int]] = {}
     all_aids: set[int] = set()
 
@@ -478,11 +530,14 @@ async def get_compounds_new(
                 "literature_count": c.literature_count,
                 "annotation_types": c.annotation_types,
                 "annotation_type_count": c.annotation_type_count,
+                "chembl_max_phase": c.chembl_max_phase,
+                "drug_like": c.drug_like,
                 "fda_approval": c.fda_approval,
                 "date_added": c.date_added,
                 "mechanisms": c.mechanisms if mechanism else None,
                 "toxicity": c.toxicity if toxicity else None,
                 "bioassays": compound_aid_map.get(c.cid, []),
+                "query_field": c.query_field,
             }
         )
 

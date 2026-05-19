@@ -114,6 +114,7 @@ class PubchemOutput(BaseModel):
     mechanisms: Optional[list[Mechanism] | None] = None
     bioassays: Optional[list[Bioassay] | None] = None
     toxicity: Optional[Toxicity | None] = None
+    query_field: Optional[str] = None
 
 
 class PubChemOutputWithBioassayIds(BaseModel):
@@ -175,6 +176,7 @@ class PubChemOutputWithBioassayIds(BaseModel):
     mechanisms: Optional[list[Mechanism] | None] = None
     toxicity: Optional[Toxicity | None] = None
     bioassays: Optional[list[int]] = []
+    query_field: Optional[str] = None
 
 
 class CompoundManyNewResponse(BaseModel):
