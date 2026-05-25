@@ -189,3 +189,21 @@ class PubchemList(BaseModel):
     smiles: str
     inchikey: str
     mapped_name: str
+
+class SubstanceToxicityOutput(BaseModel):
+    sid: int
+    dili_severity_grade: int
+    dili_annotation: str
+    hepatotoxicity_likelihood_score: str
+
+class SubstanceOutput(BaseModel):
+    sid: int
+    title: str
+    mapped_name: str
+    molecule_chembl_id: Optional[str] = None
+    chembl_max_phase: int
+
+    # ORM relationship fields
+    mechanisms: Optional[list[Mechanism] | None] = None
+    toxicity: Optional[SubstanceToxicityOutput | None] = None
+    query_field: Optional[str] = None
