@@ -7,13 +7,13 @@ from sqlalchemy import create_engine, select, or_, cast, func
 from sqlalchemy.dialects.mysql import CHAR
 from sqlalchemy.orm import sessionmaker, selectinload
 from dotenv import load_dotenv
-from models.pubchem import SubstanceOutput
+from models.pubchem import SubstanceOutput, SubstanceList
 from models.tables import Substances, SubstanceSynonyms, SubstanceToxicity
 from models.output import OutputFormat
 
 load_dotenv(override=True)
 
-router = APIRouter(prefix="/substance")
+router = APIRouter(prefix="/substance", tags=["Substances"])
 
 # Creating database connection/session
 password_cleaned = quote_plus(os.getenv("DATABASE_PASS"))
@@ -176,3 +176,45 @@ async def get_substances(
             c.query_field = sid_to_syn.get(c.sid)
 
     return rows
+
+@router.get(
+    "/all",
+    summary="Get names, pubchem sids, and the initial mapped names for all substances in AnnotationDB",
+    response_model=List[SubstanceList],
+)
+async def get_substance_identifiers(
+    session=Depends(get_db_session),
+):
+    retry = 0
+    while retry < 3:
+        try:
+            rows = (
+                session.query(
+                    Substances.title,
+                    Substances.sid,
+                    Substances.mapped_name,
+                )
+                .distinct()
+                .all()
+            )
+            break
+        except Exception as error:
+            if retry >= 2:
+                raise HTTPException(
+                    status_code=500, detail=f"Data retrieval error: {error}"
+                )
+            else:
+                print(f"retry {retry}: {error}")
+                retry += 1
+
+    result = []
+    for row in rows:
+        result.append(
+            {
+                "name": row[0],
+                "sid": row[1],
+                "mapped_name": row[2],
+            }
+        )
+
+    return result
