@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.openapi.docs import get_swagger_ui_html
 from routes.drugs import router as drugs_router
 from routes.substances import router as substance_router
+from routes.chemicals import router as chemicals_router
 from routes.cell_lines import router as cell_lines_router
 from fastapi.staticfiles import StaticFiles
 from data.description import DESCRIPTION
@@ -16,6 +17,7 @@ app = FastAPI(
 
 app.include_router(drugs_router)
 app.include_router(substance_router)
+app.include_router(chemicals_router)
 app.include_router(cell_lines_router)
 
 app.mount("/styling", StaticFiles(directory="styling"), name="styling")
