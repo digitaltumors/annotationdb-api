@@ -14,7 +14,7 @@ from routes.substances import get_substances
 
 load_dotenv(override=True)
 
-router = APIRouter(prefix="/chemical")
+router = APIRouter(prefix="/chemical", tags=["Chemicals"])
 
 # Creating database connection/session
 password_cleaned = quote_plus(os.getenv("DATABASE_PASS"))

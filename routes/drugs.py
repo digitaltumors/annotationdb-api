@@ -8,7 +8,7 @@ from sqlalchemy.dialects.mysql import CHAR
 from sqlalchemy.orm import sessionmaker, selectinload
 import pandas as pd
 from dotenv import load_dotenv
-from models.pubchem import PubchemOutput, PubchemList, CompoundManyNewResponse
+from models.pubchem import PubchemOutput, CompoundList, CompoundManyNewResponse
 from models.tables import CompoundBioAssays, Compounds, CompoundSynonyms, BioAssays
 from models.output import OutputFormat
 
@@ -59,7 +59,7 @@ GOLDEN_BIOASSAYS = [
 
 load_dotenv(override=True)
 
-router = APIRouter(prefix="/compound")
+router = APIRouter(prefix="/compound", tags=["Compounds"])
 
 # Creating database connection/session
 password_cleaned = quote_plus(os.getenv("DATABASE_PASS"))
@@ -265,9 +265,56 @@ async def get_compounds(
 
 
 @router.get(
+    "/all",
+    summary="Get names, pubchem cids, smiles, inchikeys, and the initial mapped names for all compounds in AnnotationDB",
+    response_model=List[CompoundList],
+)
+async def get_compound_identifiers(
+    session=Depends(get_db_session),
+):
+    retry = 0
+    while retry < 3:
+        try:
+            rows = (
+                session.query(
+                    Compounds.title,
+                    Compounds.cid,
+                    Compounds.smiles,
+                    Compounds.inchikey,
+                    Compounds.mapped_name,
+                )
+                .distinct()
+                .all()
+            )
+            break
+        except Exception as error:
+            if retry >= 2:
+                raise HTTPException(
+                    status_code=500, detail=f"Data retrieval error: {error}"
+                )
+            else:
+                print(f"retry {retry}: {error}")
+                retry += 1
+
+    result = []
+    for row in rows:
+        result.append(
+            {
+                "name": row[0],
+                "cid": row[1],
+                "smiles": row[2],
+                "inchikey": row[3],
+                "mapped_name": row[4],
+            }
+        )
+
+    return result
+
+
+@router.get(
     "/many/streamline",
-    summary="New endpoint to extract compound data for list of unique identifiers with improved query performance",
-    response_model=CompoundManyNewResponse,
+    summary="Novel endpoint to extract compound data for list of unique identifiers with query performance improvements (by removing redundant fields from the bioassay data)",
+    response_model=CompoundManyNewResponse, 
 )
 async def get_compounds_new(
     compounds: Annotated[
@@ -545,50 +592,3 @@ async def get_compounds_new(
         "compounds": compounds_payload,
         "bioassays": bioassay_lookup,
     }
-
-
-@router.get(
-    "/all",
-    summary="Get names, pubchem cids, smiles, and inchikeys for all compounds in AnnotationDB",
-    response_model=List[PubchemList],
-)
-async def get_compound_identifiers(
-    session=Depends(get_db_session),
-):
-    retry = 0
-    while retry < 3:
-        try:
-            rows = (
-                session.query(
-                    Compounds.title,
-                    Compounds.cid,
-                    Compounds.smiles,
-                    Compounds.inchikey,
-                    Compounds.mapped_name,
-                )
-                .distinct()
-                .all()
-            )
-            break
-        except Exception as error:
-            if retry >= 2:
-                raise HTTPException(
-                    status_code=500, detail=f"Data retrieval error: {error}"
-                )
-            else:
-                print(f"retry {retry}: {error}")
-                retry += 1
-
-    result = []
-    for row in rows:
-        result.append(
-            {
-                "name": row[0],
-                "cid": row[1],
-                "smiles": row[2],
-                "inchikey": row[3],
-                "mapped_name": row[4],
-            }
-        )
-
-    return result
