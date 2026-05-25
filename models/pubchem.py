@@ -183,7 +183,7 @@ class CompoundManyNewResponse(BaseModel):
     compounds: list[PubChemOutputWithBioassayIds]
     bioassays: dict[int, Bioassay]
 
-class PubchemList(BaseModel):
+class CompoundList(BaseModel):
     name: str
     cid: int
     smiles: str
@@ -207,3 +207,8 @@ class SubstanceOutput(BaseModel):
     mechanisms: Optional[list[Mechanism] | None] = None
     toxicity: Optional[SubstanceToxicityOutput | None] = None
     query_field: Optional[str] = None
+
+class SubstanceList(BaseModel):
+    name: str
+    sid: int
+    mapped_name: str
