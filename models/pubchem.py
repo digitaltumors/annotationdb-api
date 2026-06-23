@@ -196,7 +196,8 @@ class PubChemOutputWithBioassayIds(BaseModel):
     # ORM relationship fields
     mechanisms: Optional[list[Mechanism] | None] = None
     toxicity: Optional[Toxicity | None] = None
-    diril_toxicity: Optional[]
+    diril_toxicity: Optional[DIRIL_Toxicity| None] = None
+    dict_rank_toxicity: Optional[DICT_Rank_Toxicity | None] = None
     bioassays: Optional[list[int]] = []
     query_field: Optional[str] = None
 
