@@ -22,6 +22,7 @@ class DIRIL_Toxicity(BaseModel):
 
 class DICT_Rank_Toxicity(BaseModel):
     pubchem_cid: int
+    trade_name: str
     active_ingredients: str
     cardiotoxicity: str
     label_section: str
@@ -79,6 +80,7 @@ class PubchemOutput(BaseModel):
     title: str
     mapped_name: str
     molecule_chembl_id: Optional[str] = None
+    molecule_chembl_id_from_synonyms: Optional[bool] = False
     molecular_formula: str
     molecular_weight: str
     smiles: str
@@ -143,6 +145,7 @@ class PubChemOutputWithBioassayIds(BaseModel):
     title: str
     mapped_name: str
     molecule_chembl_id: Optional[str] = None
+    molecule_chembl_id_from_synonyms: Optional[bool] = False
     molecular_formula: str
     molecular_weight: str
     smiles: str
