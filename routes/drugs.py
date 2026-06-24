@@ -166,6 +166,8 @@ async def get_compounds(
             options.append(selectinload(Compounds.bioassays))
     if toxicity:
         options.append(selectinload(Compounds.toxicity))
+        options.append(selectinload(Compounds.diril_toxicity))
+        options.append(selectinload(Compounds.dict_rank_toxicity))
 
     # match indexed expressions on pubchem_compounds exactly
     title_idx_expr = cast(func.lower(Compounds.title), CHAR(255, charset="utf8mb4"))
@@ -271,9 +273,11 @@ async def get_compounds(
 )
 async def get_compound_identifiers(
     session=Depends(get_db_session),
+    # page: int = Query(0, description="The page of compounds you want to view (10,000 compounds per page)"),
 ):
     retry = 0
     while retry < 3:
+        # compound_bottom_range = (page) * 10000
         try:
             rows = (
                 session.query(
@@ -284,6 +288,8 @@ async def get_compound_identifiers(
                     Compounds.mapped_name,
                 )
                 .distinct()
+                # .limit(10000)
+                # .offset(compound_bottom_range)
                 .all()
             )
             break
@@ -409,6 +415,8 @@ async def get_compounds_new(
             )
     if toxicity:
         options.append(selectinload(Compounds.toxicity))
+        options.append(selectinload(Compounds.diril_toxicity))
+        options.append(selectinload(Compounds.dict_rank_toxicity))
 
     # Match the indexed expressions on pubchem_compounds exactly
     title_idx_expr = cast(func.lower(Compounds.title), CHAR(255, charset="utf8mb4"))
@@ -532,6 +540,7 @@ async def get_compounds_new(
                 "title": c.title,
                 "mapped_name": c.mapped_name,
                 "molecule_chembl_id": c.molecule_chembl_id,
+                "molecule_chembl_id_from_synonyms": c.molecule_chembl_id_from_synonyms,
                 "molecular_formula": c.molecular_formula,
                 "molecular_weight": c.molecular_weight,
                 "smiles": c.smiles,
@@ -583,6 +592,8 @@ async def get_compounds_new(
                 "date_added": c.date_added,
                 "mechanisms": c.mechanisms if mechanism else None,
                 "toxicity": c.toxicity if toxicity else None,
+                "diril_toxicity": c.diril_toxicity if toxicity else None,
+                "dict_rank_toxicity": c.dict_rank_toxicity if toxicity else None,
                 "bioassays": compound_aid_map.get(c.cid, []),
                 "query_field": c.query_field,
             }
