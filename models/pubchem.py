@@ -5,10 +5,12 @@ from datetime import datetime
 
 class Toxicity(BaseModel):
     pubchem_cid: int
-    dili_dataset: str
-    dili_severity_grade: int
-    dili_annotation: str
-    hepatotoxicity_likelihood_score: str
+    tox_dataset: str
+    dili_severity_grade: Optional[int] = None
+    dili_annotation: Optional[str] = None
+    tox_source_url: Optional[str] = None
+    hepatotoxicity_likelihood_score: Optional[str] = None
+    hepatotoxicity_likelihood_score_reasoning: Optional[str] = None
 
 class DIRIL_Toxicity(BaseModel):
     pubchem_cid: int
@@ -134,7 +136,7 @@ class PubchemOutput(BaseModel):
     # ORM relationship fields
     mechanisms: Optional[list[Mechanism] | None] = None
     bioassays: Optional[list[Bioassay] | None] = None
-    toxicity: Optional[Toxicity | None] = None
+    toxicity: Optional[list[Toxicity]] = None
     diril_toxicity: Optional[DIRIL_Toxicity | None] = None
     dict_rank_toxicity: Optional[DICT_Rank_Toxicity | None] = None
     query_field: Optional[str] = None
@@ -198,7 +200,7 @@ class PubChemOutputWithBioassayIds(BaseModel):
 
     # ORM relationship fields
     mechanisms: Optional[list[Mechanism] | None] = None
-    toxicity: Optional[Toxicity | None] = None
+    toxicity: Optional[list[Toxicity]] = None
     diril_toxicity: Optional[DIRIL_Toxicity| None] = None
     dict_rank_toxicity: Optional[DICT_Rank_Toxicity | None] = None
     bioassays: Optional[list[int]] = []
@@ -218,10 +220,12 @@ class CompoundList(BaseModel):
 
 class SubstanceToxicityOutput(BaseModel):
     sid: int
-    dili_dataset: str
-    dili_severity_grade: int
-    dili_annotation: str
-    hepatotoxicity_likelihood_score: str
+    tox_dataset: str
+    dili_severity_grade: Optional[int] = None
+    dili_annotation: Optional[str] = None
+    tox_source_url: Optional[str] = None
+    hepatotoxicity_likelihood_score: Optional[str] = None
+    hepatotoxicity_likelihood_score_reasoning: Optional[str] = None
 
 class SubstanceOutput(BaseModel):
     sid: int
@@ -232,7 +236,7 @@ class SubstanceOutput(BaseModel):
 
     # ORM relationship fields
     mechanisms: Optional[list[Mechanism] | None] = None
-    toxicity: Optional[SubstanceToxicityOutput | None] = None
+    toxicity: Optional[list[SubstanceToxicityOutput]] = None
     query_field: Optional[str] = None
 
 class SubstanceList(BaseModel):
