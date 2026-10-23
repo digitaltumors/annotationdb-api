@@ -65,6 +65,10 @@ async def get_chemicals(
     toxicity: bool = Query(
         False, description="Toggle to include toxicity for queried chemical(s)"
     ),
+    label: bool = Query(
+        False,
+        description="Toggle to include the DailyMed drug label (boxed warning, warnings and precautions, adverse reactions) for queried chemical(s) (compounds only)",
+    ),
     golden_bioassay: bool = Query(
         False,
         description="Toggle to include gold standard bioassays for queried chemical(s) (compounds only)",
@@ -85,6 +89,7 @@ async def get_chemicals(
         mechanism=mechanism,
         indication=indication,
         toxicity=toxicity,
+        label=label,
         golden_bioassay=golden_bioassay,
         session=session
     )

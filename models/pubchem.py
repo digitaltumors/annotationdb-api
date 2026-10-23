@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from datetime import datetime
+from datetime import date, datetime
 
 
 class Toxicity(BaseModel):
@@ -12,6 +12,7 @@ class Toxicity(BaseModel):
     hepatotoxicity_likelihood_score: Optional[str] = None
     hepatotoxicity_likelihood_score_reasoning: Optional[str] = None
 
+
 class DIRIL_Toxicity(BaseModel):
     pubchem_cid: int
     description: str
@@ -22,6 +23,7 @@ class DIRIL_Toxicity(BaseModel):
     label_shi: str
     toxicity: str
 
+
 class DICT_Rank_Toxicity(BaseModel):
     pubchem_cid: int
     trade_name: str
@@ -31,6 +33,33 @@ class DICT_Rank_Toxicity(BaseModel):
     dic_severity_level: str
     dict_concern: str
     keywords: str
+
+
+# One DailyMed Structured Product Label (SPL) per approved drug (ChEMBL max_phase == 4)
+class DailyMedLabel(BaseModel):
+    pubchem_cid: int
+    molecule_chembl_id: Optional[str] = None
+    # How the drug was matched to DailyMed
+    unii: Optional[str] = None
+    unii_source: str
+    search_tier: str
+    candidate_count: int
+    # The chosen label (view it at https://dailymed.nlm.nih.gov/dailymed/lookup.cfm?setid=<setid>)
+    setid: str
+    spl_title: str
+    spl_version: int
+    published_date: Optional[date] = None
+    document_type: str
+    marketing_category: Optional[str] = None
+    application_number: Optional[str] = None
+    active_moiety_uniis: Optional[str] = None
+    is_single_ingredient: bool
+    label_format: str
+    # Label data
+    boxed_warning: Optional[str] = None
+    warnings_and_precautions: Optional[str] = None
+    adverse_reactions: Optional[str] = None
+
 
 class Bioassay(BaseModel):
     aid: int
@@ -44,7 +73,6 @@ class Bioassay(BaseModel):
     activity_outcome_method: Optional[int] = None
     target_name: Optional[str] = None
     target_protein_accession: Optional[str] = None
-
 
 
 class Mechanism(BaseModel):
@@ -164,6 +192,7 @@ class PubchemOutput(BaseModel):
     toxicity: Optional[list[Toxicity]] = None
     diril_toxicity: Optional[DIRIL_Toxicity | None] = None
     dict_rank_toxicity: Optional[DICT_Rank_Toxicity | None] = None
+    dailymed_label: Optional[DailyMedLabel | None] = None
     query_field: Optional[str] = None
 
 
@@ -227,8 +256,9 @@ class PubChemOutputWithBioassayIds(BaseModel):
     mechanisms: Optional[list[Mechanism] | None] = None
     drug_indications: Optional[list[DrugIndication] | None] = None
     toxicity: Optional[list[Toxicity]] = None
-    diril_toxicity: Optional[DIRIL_Toxicity| None] = None
+    diril_toxicity: Optional[DIRIL_Toxicity | None] = None
     dict_rank_toxicity: Optional[DICT_Rank_Toxicity | None] = None
+    dailymed_label: Optional[DailyMedLabel | None] = None
     bioassays: Optional[list[int]] = []
     query_field: Optional[str] = None
 
@@ -237,12 +267,14 @@ class CompoundManyNewResponse(BaseModel):
     compounds: list[PubChemOutputWithBioassayIds]
     bioassays: dict[int, Bioassay]
 
+
 class CompoundList(BaseModel):
     name: str
     cid: int
     smiles: str
     inchikey: str
     mapped_name: str
+
 
 class SubstanceToxicityOutput(BaseModel):
     sid: int
@@ -252,6 +284,7 @@ class SubstanceToxicityOutput(BaseModel):
     tox_source_url: Optional[str] = None
     hepatotoxicity_likelihood_score: Optional[str] = None
     hepatotoxicity_likelihood_score_reasoning: Optional[str] = None
+
 
 class SubstanceOutput(BaseModel):
     sid: int
@@ -265,6 +298,7 @@ class SubstanceOutput(BaseModel):
     drug_indications: Optional[list[DrugIndication] | None] = None
     toxicity: Optional[list[SubstanceToxicityOutput]] = None
     query_field: Optional[str] = None
+
 
 class SubstanceList(BaseModel):
     name: str

@@ -145,6 +145,10 @@ async def get_compounds(
     toxicity: bool = Query(
         False, description="Toggle to include toxicity for queried compound(s)"
     ),
+    label: bool = Query(
+        False,
+        description="Toggle to include the DailyMed drug label (boxed warning, warnings and precautions, adverse reactions) for queried compound(s)",
+    ),
     golden_bioassay: bool = Query(
         False,
         description="Toggle to include gold standard bioassays for queried compound(s)",
@@ -211,6 +215,8 @@ async def get_compounds(
         options.append(selectinload(Compounds.toxicity))
         options.append(selectinload(Compounds.diril_toxicity))
         options.append(selectinload(Compounds.dict_rank_toxicity))
+    if label:
+        options.append(selectinload(Compounds.dailymed_label))
 
     # match indexed expressions on pubchem_compounds exactly
     title_idx_expr = cast(func.lower(Compounds.title), CHAR(255, charset="utf8mb4"))
@@ -395,6 +401,10 @@ async def get_compounds_new(
     toxicity: bool = Query(
         False, description="Toggle to include toxicity for queried compound(s)"
     ),
+    label: bool = Query(
+        False,
+        description="Toggle to include the DailyMed drug label (boxed warning, warnings and precautions, adverse reactions) for queried compound(s)",
+    ),
     golden_bioassay: bool = Query(
         False,
         description="Toggle to include gold standard bioassays for queried compound(s)",
@@ -469,6 +479,8 @@ async def get_compounds_new(
         options.append(selectinload(Compounds.toxicity))
         options.append(selectinload(Compounds.diril_toxicity))
         options.append(selectinload(Compounds.dict_rank_toxicity))
+    if label:
+        options.append(selectinload(Compounds.dailymed_label))
 
     # Match the indexed expressions on pubchem_compounds exactly
     title_idx_expr = cast(func.lower(Compounds.title), CHAR(255, charset="utf8mb4"))
@@ -647,6 +659,7 @@ async def get_compounds_new(
                 "toxicity": c.toxicity if toxicity else None,
                 "diril_toxicity": c.diril_toxicity if toxicity else None,
                 "dict_rank_toxicity": c.dict_rank_toxicity if toxicity else None,
+                "dailymed_label": c.dailymed_label if label else None,
                 "bioassays": compound_aid_map.get(c.cid, []),
                 "query_field": c.query_field,
             }
