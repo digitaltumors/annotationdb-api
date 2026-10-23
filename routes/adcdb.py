@@ -48,6 +48,10 @@ async def get_adcs(
     indication: bool = Query(
         False, description="Toggle to include ADC indications for queried ADC(s)"
     ),
+    activity: bool = Query(
+        False,
+        description="Toggle to include ADCdb activity data (cell line, human clinical, PDX, CDX and model organism) for queried ADC(s)",
+    ),
     session=Depends(get_db_session),
 ):
     if not adcs:
@@ -70,13 +74,38 @@ async def get_adcs(
     other_terms_255 = [term[:255] for term in other_terms]
 
     # match indexed expressions
-    name_idx_expr = cast(func.lower(AntibodyDrugConjugates.adc_name), CHAR(255, charset="utf8mb4"))
-    drug_name_idx_expr = cast(func.lower(AntibodyDrugConjugates.adc_drug_name), CHAR(255, charset="utf8mb4"))
-    id_idx_expr = cast(func.lower(AntibodyDrugConjugates.adc_id), CHAR(255, charset="utf8mb4"))
+    name_idx_expr = cast(
+        func.lower(AntibodyDrugConjugates.adc_name), CHAR(255, charset="utf8mb4")
+    )
+    drug_name_idx_expr = cast(
+        func.lower(AntibodyDrugConjugates.adc_drug_name), CHAR(255, charset="utf8mb4")
+    )
+    id_idx_expr = cast(
+        func.lower(AntibodyDrugConjugates.adc_id), CHAR(255, charset="utf8mb4")
+    )
 
     options = []
     if indication:
         options.append(selectinload(AntibodyDrugConjugates.indications))
+    if activity:
+        # One activity table per evidence level
+        options.append(selectinload(AntibodyDrugConjugates.cell_line_activity_data))
+        options.append(
+            selectinload(AntibodyDrugConjugates.human_clinical_activity_data)
+        )
+        options.append(
+            selectinload(
+                AntibodyDrugConjugates.patient_derived_xenograft_model_activity_data
+            )
+        )
+        options.append(
+            selectinload(
+                AntibodyDrugConjugates.cell_line_derived_xenograft_model_activity_data
+            )
+        )
+        options.append(
+            selectinload(AntibodyDrugConjugates.model_organism_activity_data)
+        )
 
     retry = 0
     while retry < 3:
@@ -114,7 +143,7 @@ async def get_adcs(
             terms.append(str(r.adc_pubchem_sid))
         if r.adc_drug_name:
             terms.append(r.adc_drug_name)
-        
+
         search_terms.extend(terms)
         adc_to_terms[r.adc_id] = terms
 
@@ -128,7 +157,7 @@ async def get_adcs(
             mechanism=True,
             indication=True,
             toxicity=True,
-            session=session
+            session=session,
         )
 
     # get_substances sets query_field on the returned ORM objects
@@ -145,7 +174,7 @@ async def get_adcs(
             or term_lower_to_orig.get((c.adc_name or "").lower()[:255])
             or term_lower_to_orig.get((c.adc_drug_name or "").lower()[:255])
         )
-        
+
         # Attach substance_data using either SID or drug name
         subst = None
         terms_to_check = adc_to_terms.get(c.adc_id, [])
@@ -154,7 +183,7 @@ async def get_adcs(
             if term_lower in term_lower_to_substance:
                 subst = term_lower_to_substance[term_lower]
                 break
-                
+
         c.substance_data = subst
 
     return rows

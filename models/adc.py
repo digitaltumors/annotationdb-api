@@ -2,19 +2,70 @@ from pydantic import BaseModel
 from typing import Optional
 from models.pubchem import SubstanceOutput
 
+
 class AdcList(BaseModel):
     adc_id: str
     adc_name: str
     adc_drug_name: str
 
+
 class AdcIndication(BaseModel):
     id: int
     adc_id: str
-    name: str
+    disease_name: str
     status: str
     trial_ids: Optional[str] = None
+    approval_year: Optional[str] = None
     document: Optional[str] = None
     link: Optional[str] = None
+
+
+# Fields shared by every ADCdb activity level.
+class AdcActivityBase(BaseModel):
+    activity_id: str
+    adc_id: str
+    standard_type: Optional[str] = None
+    value: Optional[str] = None
+    expression: Optional[str] = None
+
+
+class AdcCellLineActivity(AdcActivityBase):
+    method_description: Optional[str] = None
+    in_vitro_disease: Optional[str] = None
+    in_vitro_cell_line: Optional[str] = None
+    cellosaurus_id: Optional[str] = None
+    cellosaurus_link: Optional[str] = None
+
+
+class AdcHumanClinicalActivity(AdcActivityBase):
+    patients_enrolled: Optional[str] = None
+    administration_dosage: Optional[str] = None
+    nct_number: Optional[str] = None
+    nct_link: Optional[str] = None
+    clinical_status: Optional[str] = None
+    clinical_description: Optional[str] = None
+    primary_endpoint: Optional[str] = None
+    other_endpoint: Optional[str] = None
+
+
+class AdcPatientDerivedXenograftModelActivity(AdcActivityBase):
+    method_description: Optional[str] = None
+    in_vivo_model: Optional[str] = None
+
+
+class AdcCellLineDerivedXenograftModelActivity(AdcActivityBase):
+    method_description: Optional[str] = None
+    in_vivo_model: Optional[str] = None
+    in_vitro_disease: Optional[str] = None
+    in_vitro_cell_line: Optional[str] = None
+    cellosaurus_id: Optional[str] = None
+    cellosaurus_link: Optional[str] = None
+
+
+class AdcModelOrganismActivity(AdcActivityBase):
+    method_description: Optional[str] = None
+    in_vivo_model: Optional[str] = None
+
 
 class AdcOutput(BaseModel):
     adc_id: str
@@ -128,5 +179,14 @@ class AdcOutput(BaseModel):
 
     # Joined property
     indications: Optional[list[AdcIndication] | None] = None
+    cell_line_activity_data: Optional[list[AdcCellLineActivity] | None] = None
+    human_clinical_activity_data: Optional[list[AdcHumanClinicalActivity] | None] = None
+    patient_derived_xenograft_model_activity_data: Optional[
+        list[AdcPatientDerivedXenograftModelActivity] | None
+    ] = None
+    cell_line_derived_xenograft_model_activity_data: Optional[
+        list[AdcCellLineDerivedXenograftModelActivity] | None
+    ] = None
+    model_organism_activity_data: Optional[list[AdcModelOrganismActivity] | None] = None
     substance_data: Optional[SubstanceOutput] = None
     query_field: Optional[str] = None
