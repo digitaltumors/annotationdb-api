@@ -117,6 +117,8 @@ on or off (off by default) to include additional annotation data, as show in the
     <ul><li><strong>Default value</strong>: false</li></ul>
     <li><code>toxicity=</code>: true/false field which decides whether to include the toxicity fields related to the compound(s) queried for</li>
     <ul><li><strong>Default value</strong>: false</li></ul>
+    <li><code>label=</code>: true/false field which decides whether to include the DailyMed drug label (boxed warning, warnings and precautions, adverse reactions) of the FDA approved compound(s) queried for</li>
+    <ul><li><strong>Default value</strong>: false</li></ul>
 	<li><code>bioassay=</code>: true/false field which decides whether to include the list of homo sapien bioassays related to the compound(s) queried for</li>
     <ul><li><strong>Default value</strong>: false</li></ul>
     <li><code>golden_bioassay=</code>: true/false field which decides whether to include the list of only our internal
@@ -151,6 +153,12 @@ on or off (off by default) to include additional annotation data, as show in the
 			<a href="https://www.who.int/tools/atc-ddd-toolkit/atc-classification" target="_blank" rel="noopener noreferrer">Anatomical Therapeutic Classification codes (ATCs)</a>
 		</li>
 	</ul>
+		<li>DailyMed</li>
+		<ul>
+			<li>
+				<a href="https://dailymed.nlm.nih.gov/dailymed/app-support-web-services.cfm" target="_blank" rel="noopener noreferrer">DailyMed Drug Labels (Structured Product Labels)</a>
+			</li>
+		</ul>
 		<li>ChEMBL</li>
 		<ul>
 			<li>
