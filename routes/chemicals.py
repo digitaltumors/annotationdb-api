@@ -31,9 +31,11 @@ def get_db_session():
     yield session  # Use 'yields' instead of 'return' to ensure we can close the session, avoiding leaks
     session.close()
 
+
 class ChemicalsOutput(BaseModel):
     compounds: List[PubchemOutput]
     substances: List[SubstanceOutput]
+
 
 @router.get(
     "/many",
@@ -60,7 +62,8 @@ async def get_chemicals(
         False, description="Toggle to include ChEMBL mechanism for queried chemical(s)"
     ),
     indication: bool = Query(
-        False, description="Toggle to include ChEMBL drug indications for queried chemical(s)"
+        False,
+        description="Toggle to include ChEMBL drug indications for queried chemical(s)",
     ),
     toxicity: bool = Query(
         False, description="Toggle to include toxicity for queried chemical(s)"
@@ -91,7 +94,7 @@ async def get_chemicals(
         toxicity=toxicity,
         label=label,
         golden_bioassay=golden_bioassay,
-        session=session
+        session=session,
     )
 
     substances_result = await get_substances(
@@ -100,10 +103,7 @@ async def get_chemicals(
         mechanism=mechanism,
         indication=indication,
         toxicity=toxicity,
-        session=session
+        session=session,
     )
 
-    return {
-        "compounds": compounds_result,
-        "substances": substances_result
-    }
+    return {"compounds": compounds_result, "substances": substances_result}

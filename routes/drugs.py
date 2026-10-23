@@ -140,7 +140,8 @@ async def get_compounds(
         False, description="Toggle to include ChEMBL mechanism for queried compound(s)"
     ),
     indication: bool = Query(
-        False, description="Toggle to include ChEMBL drug indications for queried compound(s)"
+        False,
+        description="Toggle to include ChEMBL drug indications for queried compound(s)",
     ),
     toxicity: bool = Query(
         False, description="Toggle to include toxicity for queried compound(s)"
@@ -373,7 +374,7 @@ async def get_compound_identifiers(
 @router.get(
     "/many/streamline",
     summary="Novel endpoint to extract compound data for list of unique identifiers with query performance improvements (by removing redundant fields from the bioassay data)",
-    response_model=CompoundManyNewResponse, 
+    response_model=CompoundManyNewResponse,
 )
 async def get_compounds_new(
     compounds: Annotated[
@@ -396,7 +397,8 @@ async def get_compounds_new(
         False, description="Toggle to include ChEMBL mechanism for queried compound(s)"
     ),
     indication: bool = Query(
-        False, description="Toggle to include ChEMBL drug indications for queried compound(s)"
+        False,
+        description="Toggle to include ChEMBL drug indications for queried compound(s)",
     ),
     toxicity: bool = Query(
         False, description="Toggle to include toxicity for queried compound(s)"
