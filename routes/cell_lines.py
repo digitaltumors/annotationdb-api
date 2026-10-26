@@ -1,36 +1,20 @@
 import os
 from pydantic import BaseModel, Field
 from typing import List
-from urllib.parse import quote_plus
 from fastapi import APIRouter, HTTPException, Depends, Query
-from sqlalchemy import create_engine, select, or_
-from sqlalchemy.orm import sessionmaker, selectinload
+from sqlalchemy import select, or_
+from sqlalchemy.orm import selectinload
 import pandas as pd
 from dotenv import load_dotenv
 from models.tables import CellLines, CellLineSynonyms, CellLineDisease
 from models.output import OutputFormat
 from models.cellosaurus import CellosaurusOutput, CellosuarusList
+from models.database import get_db_session
 
 load_dotenv(override=True)
 
 
 router = APIRouter(prefix="/cell_line", tags=["Cell Lines"])
-
-
-# Creating database connection/session
-password_cleaned = quote_plus(os.getenv("DATABASE_PASS"))
-engine = create_engine(
-    f"mysql+pymysql://{os.getenv('DATABASE_USER')}:{password_cleaned}"
-    f"@{os.getenv('DATABASE_IP')}:{os.getenv('PORT')}/{os.getenv('SELECTED_DB')}",
-    echo=True,
-)
-session_maker = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-
-
-def get_db_session():
-    session = session_maker()
-    yield session  # Use 'yields' instead of 'return' to ensure we can close the session, avoiding leaks
-    session.close()
 
 
 @router.get(

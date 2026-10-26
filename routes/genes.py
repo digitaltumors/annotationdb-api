@@ -1,17 +1,4 @@
-import os
-from typing import List, Annotated, Optional
-from urllib.parse import quote_plus
-from fastapi import APIRouter, HTTPException, Depends, Query, Security
-from sqlalchemy import create_engine, select, or_, cast, func
-from sqlalchemy.dialects.mysql import CHAR
-from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv
-
-from models.atc import ATCCode, ATCCodesOutput
-from models.tables import ATCCodes
-from models.auth import get_api_key
-
-load_dotenv(override=True)
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/gene", tags=["Genes"])
 

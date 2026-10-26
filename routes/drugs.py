@@ -1,17 +1,17 @@
 import os
 from pydantic import BaseModel, Field
 from typing import List, Annotated, Optional
-from urllib.parse import quote_plus
 from fastapi import APIRouter, HTTPException, Depends, Query, Security
-from sqlalchemy import create_engine, select, or_, cast, func, select
+from sqlalchemy import select, or_, cast, func
 from sqlalchemy.dialects.mysql import CHAR
-from sqlalchemy.orm import sessionmaker, selectinload
+from sqlalchemy.orm import selectinload
 import pandas as pd
 from dotenv import load_dotenv
 from models.pubchem import PubchemOutput, CompoundList, CompoundManyNewResponse
 from models.tables import CompoundBioAssays, Compounds, CompoundSynonyms, BioAssays
 from models.output import OutputFormat
 from models.auth import get_optional_api_key
+from models.database import get_db_session
 
 # GOLDEN_BIOASSAYS = [
 #     485290,
@@ -97,21 +97,6 @@ GOLDEN_BIOASSAYS = [
 load_dotenv(override=True)
 
 router = APIRouter(prefix="/compound", tags=["Compounds"])
-
-# Creating database connection/session
-password_cleaned = quote_plus(os.getenv("DATABASE_PASS"))
-engine = create_engine(
-    f"mysql+pymysql://{os.getenv('DATABASE_USER')}:{password_cleaned}"
-    f"@{os.getenv('DATABASE_IP')}:{os.getenv('PORT')}/{os.getenv('SELECTED_DB')}",
-    echo=True,
-)
-session_maker = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-
-
-def get_db_session():
-    session = session_maker()
-    yield session  # Use 'yields' instead of 'return' to ensure we can close the session, avoiding leaks
-    session.close()
 
 
 @router.get(
